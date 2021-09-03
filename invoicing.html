@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Выставление счетов</title>
+    <meta charset="utf-8">
+    <link href="../../assets/css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../assets/css/bootstrap-reboot.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../assets/css/style.css">
+</head>
+<body>
+<div class="container-fluid">
+    <div class="text-center">
+        <h1>Выставление счетов</h1>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <div class="row mt-3 mb-xl-5">
+        <div class="col-3 m-auto">
+            <div class="card mt-3" id="InputNewInvoice">
+                <h5 class="card-header">Выставить счета по списку</h5>
+                <div class="card-body">
+                    <form class="form">
+                        <div class="share-form">
+                            <div class="input-group">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="InputNewInvoiceChooseFile" name="uploaded_file" lang="ru" aria-describedby="InputNewInvoiceAdd">
+                                    <label class="custom-file-label" for="InputNewInvoiceChooseFile" data-browse="Обзор">Выберите файл</label>
+                                </div>
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-secondary" type="button" id="InputNewInvoiceAdd_Button">Загрузить</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer" id="InputNewInvoiceFooter" >
+                    <div class="d-flex justify-content-center">
+                        <div class="spinner-border text-primary" role="status" id="statusSpinnerInputNewInvoice" >
+                            <span class="sr-only">Loading...</span>
+                        </div>
+                    </div>
+                    <p class="text-success font-weight-bold" id="successStatementInputNewInvoice" >success</p>
+                    <p class="text-danger font-weight-bold" id="warningStatementInputNewInvoice" >warning</p>
+                    <input type="week">
+                </div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script src="https://code.jquery.com/jquery-latest.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function () {
+
+        // Нажатие кнопки выбор файла
+        $('#InputNewInvoiceChooseFile').on('change',function(){
+            // получаем имя файла
+            var fileName = $(this).val();
+            // измените значение "fake path" (в Chrome) на пустую строку
+            fileName = fileName.replace("C:\\fakepath\\", "");
+            // заменяем надпись "Выберите файл" в label
+            $(this).next('.custom-file-label').html(fileName);
+        })
+
+    })    
+</script>       
+
+</body>
+</html>
