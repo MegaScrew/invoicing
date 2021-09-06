@@ -14,6 +14,6 @@ function weeakToDay(int $week_number = 1, int $year = 2011){
   		$day[$i]=date('d/m/Y', $week_number * 7 * 86400 + strtotime('1/1/' . $year) - date('w', strtotime('1/1/' . $year)) * 86400 + 86400*$i);
   	}
 
-  	return $first_day, $last_day;
+  	return array('first_day' => $first_day, 'last_day' => $last_day);
 }
 ?>
