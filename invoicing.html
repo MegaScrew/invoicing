@@ -102,6 +102,46 @@
             $( "#progress-value" ).html(percent + '%');
             $( ".fa-spinner" ).prop('hidden', false);
             //$( ".fa-spinner" ).removeClass('hidden');
+
+            //////////////////////////////////////////////////////
+            let files = document.querySelector('#InputNewPaymentsChooseFile').files;
+
+            console.log(files);
+
+            let data = null;
+            data = new FormData();
+            $.each(files, function( key, value ){
+                data.append( key, value );
+            });
+            data.append( 'my_file_upload', 1 );
+
+            console.log(data.getAll('0'))
+            $.ajax({
+                url         : 'check.php',
+                type        : 'POST', // важно!
+                data        : data,
+                cache       : false,
+                // dataType    : 'json',
+                // отключаем обработку передаваемых данных, пусть передаются как есть
+                processData : false,
+                // отключаем установку заголовка типа запроса. Так jQuery скажет серверу что это строковой запрос
+                contentType : false,
+
+                beforeSend : function(){
+
+                },
+
+                complete : function(){
+
+                },
+
+                success : function(respond, status, jqXHR ){
+                    console.log(respond);
+                },
+
+                error: function( jqXHR, status, errorThrown ){
+
+                }
             
         })
 
@@ -116,7 +156,7 @@
 
         // Step 5 Choosing a direction Оплата по Кг
 
-        
+
     })    
 </script>       
 
