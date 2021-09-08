@@ -76,6 +76,7 @@
             $( "#progress" ).prop('hidden', true);
             $( ".fa-spinner" ).prop('hidden', true);
             $( "#general-progress" ).removeClass('progress-bar-animated');
+            $( "#successStatementInputNewInvoice" ).prop('hidden', true);
 
             if (this.id == 'week') {
                 if( this.value ){
@@ -100,6 +101,8 @@
         $('#InputNewInvoiceAdd_Button').click(function () {
             jQuery.ajaxSetup({async:true});
             var Recordings = null;
+            var first_day = null;
+            var last_day = null;
             let week = document.getElementById("week");
             let warningStatement2 = document.getElementById("warningStatementInputNewInvoice");
             let successStatement2 = document.getElementById("successStatementInputNewInvoice");
@@ -156,16 +159,16 @@
 
                 success : function(respond, status, jqXHR ){
                     // console.log(respond);
-                    Recordings =(JSON.parse(respond))['recordings'];
-                    // console.log(Recordings[1]);
+                    Recordings = (JSON.parse(respond))['recordings'];
+                    first_day = (JSON.parse(respond))['first_day'];
+                    last_day = (JSON.parse(respond))['last_day'];
                     percent += 4;
                     $( "#general-progress" ).css('width', percent + '%');
                     $( "#progress-value" ).html(percent + '%');
                     successStatement2.innerHTML = 'Step 1 reading a file';
                     $( "#successStatementInputNewInvoice" ).prop('hidden', false);
 
-                    // Step 2 search for the company ID by internal number
-                    // console.log(Recordings);
+                    // Step 2 search for the company ID by internal number;
                     $.ajax({
                         url         : 'check.php',
                         type        : 'POST', // важно!
@@ -173,8 +176,8 @@
 
                         // функция успешного ответа сервера
                         success     : function(respond, status, jqXHR ){
-                            let test = respond;
-                            console.log(test);
+                            console.log(respond);
+                            // Recordings = (JSON.parse(respond))['recordings'];
                             percent += 10;
                             $( "#general-progress" ).css('width', percent + '%');
                             $( "#progress-value" ).html(percent + '%');
