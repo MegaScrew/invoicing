@@ -9,23 +9,37 @@ switch ($_POST['Step']) {
 		$file = myReadFile($_FILES);
 		$params += $file;
 		echo(json_encode($params, JSON_UNESCAPED_UNICODE));
+
 		// echo '<pre>';
 		// 	echo 'Step 1';
+		// 	print_r($params);
 		// echo '</pre>';
 		break;
 	case '2':
 		$recordings = json_decode($_POST['recordings'], true);
 
-		// $test = getCompanyList('crm.company.list', $recordings);
-		
-		echo '<pre>';
-			print_r(count($recordings));
-		echo '</pre>';
+		$test = getCompanyList('crm.company.list', $recordings);
 
+		$order = array("\n\t", "\t", "  ", "   ");
+		$replace = '';
+		
+		foreach ($recordings as &$row) {
+			foreach ($test as $rowtest) {
+				if (str_replace($order, $replace, $row[3]) == $rowtest['UF_CRM_1594794891']) {
+					// echo 'here';
+					$row[2] = $rowtest['ID'];
+				}else{
+					$row[2] = 0;
+				}				
+			}
+		}
 
 		//echo(json_encode($params, JSON_UNESCAPED_UNICODE));
 		echo '<pre>';
 			echo 'Step 2';
+		echo '</pre>';
+		echo '<pre>';
+			print_r($test);
 		echo '</pre>';
 		break;
 	case '3':
