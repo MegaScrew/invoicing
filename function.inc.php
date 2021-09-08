@@ -25,7 +25,7 @@ function weekToDay(int $week_number = 1, int $year = 2011){
 * @param $file - array file from a web form
 * @return array
 */
-function readFile(array $file){
+function myReadFile(array $file){
 	$recordings = [];
 	$i = 0;
 	$uploadfile = basename($file[0]['name']);
