@@ -57,9 +57,11 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
 <script>
     $(document).ready(function () {
-        let flag = false;
+        let flag1 = false;
+        let flag2 = false;
         // Нажатие кнопки выбор файла
         $('#InputNewInvoiceChooseFile, #week').on('change',function(){
+            console.log(this.id);
             // получаем имя файла
             var fileName = $(this).val();
             // измените значение "fake path" (в Chrome) на пустую строку
@@ -74,17 +76,25 @@
             $( ".fa-spinner" ).prop('hidden', true);
             $( "#general-progress" ).removeClass('progress-bar-animated');
 
-            if( this.value ){
-                flag = true;
-                console.log( "Выбрали файл!" ); 
-            } else { // Если после выбранного тыкнули еще раз, но дальше cancel
-                flag = false;
-                console.log( "Файл не выбран" );
-                $(this).next('.custom-file-label').html("Выберите файл");
-                 
+            if (this.id == 'week') {
+                if( this.value ){
+                    flag2 = true;
+                    console.log( "Выбрали период!" ); 
+                } else { // Если после выбранного тыкнули еще раз, но дальше cancel
+                    flag2 = false;
+                    console.log( "Период не выбран" );
+                }
+            } else {
+                if( this.value ){
+                    flag1 = true;
+                    console.log( "Выбрали файл!" ); 
+                } else { // Если после выбранного тыкнули еще раз, но дальше cancel
+                    flag1 = false;
+                    console.log( "Файл не выбран" );
+                    $(this).next('.custom-file-label').html("Выберите файл");
+                }
             }
-        })
-        
+        })        
         
         $('#InputNewInvoiceAdd_Button').click(function () {
             let week = document.getElementById("week");
@@ -97,15 +107,15 @@
             $( ".fa-spinner" ).prop('hidden', false);
             $( "#general-progress" ).addClass('progress-bar-animated');
 
-            if (flag && (week.value != '')) {
+            if (flag1 && flag2) {
                 percent = 6;
                 $( "#general-progress" ).css('width', percent + '%');
                 $( "#progress-value" ).html(percent + '%');
                 $( "#warningStatementInputNewInvoice" ).prop('hidden', true);
             }else{
-                if (!flag) {warningStatement2.innerHTML = 'Выбирете файл';}                
-                if (week.value == '') {warningStatement2.innerHTML = 'Выбирете период';}
-                if (!flag && (week.value == '')) {warningStatement2.innerHTML = 'Выбирете файл и период';}
+                if (!flag1) {warningStatement2.innerHTML = 'Выбирете файл';}                
+                if (!flag2) {warningStatement2.innerHTML = 'Выбирете период';}
+                if (!flag1 && !flag2) {warningStatement2.innerHTML = 'Выбирете файл и период';}
                 $( "#warningStatementInputNewInvoice" ).prop('hidden', false);
                 // alert('Выбирете файл');
                 $( "#progress" ).prop('hidden', true);
