@@ -59,13 +59,20 @@
     $(document).ready(function () {
         let flag = false;
         // Нажатие кнопки выбор файла
-        $('#InputNewInvoiceChooseFile').on('change',function(){
+        $('#InputNewInvoiceChooseFile, #week').on('change',function(){
             // получаем имя файла
             var fileName = $(this).val();
             // измените значение "fake path" (в Chrome) на пустую строку
             fileName = fileName.replace("C:\\fakepath\\", "");
             // заменяем надпись "Выберите файл" в label
             $(this).next('.custom-file-label').html(fileName);
+
+            let percent = 0;
+            $( "#general-progress" ).css('width', percent + '%');
+            $( "#progress-value" ).html(percent + '%');
+            $( "#progress" ).prop('hidden', true);
+            $( ".fa-spinner" ).prop('hidden', true);
+            $( "#general-progress" ).removeClass('progress-bar-animated');
 
             if( this.value ){
                 flag = true;
@@ -74,12 +81,7 @@
                 flag = false;
                 console.log( "Файл не выбран" );
                 $(this).next('.custom-file-label').html("Выберите файл");
-                let percent = 0;
-                $( "#general-progress" ).css('width', percent + '%');
-                $( "#progress-value" ).html(percent + '%');
-                $( "#progress" ).prop('hidden', true);
-                $( ".fa-spinner" ).prop('hidden', true);
-                $( "#general-progress" ).removeClass('progress-bar-animated'); 
+                 
             }
         })
         
@@ -115,21 +117,10 @@
             
             // Step 1 reading a file
             //////////////////////////////////////////////////////
-            let files = document.querySelector('#InputNewInvoiceChooseFile').files;
+            // let files = document.querySelector('#InputNewInvoiceChooseFile').files;
+            // console.log(files);
 
-            console.log(files);
-
-            var data = new FormData($('#formdata').get(0));
-            // let data = null;
-            // data = new FormData();
-            // $.each(files, function( key, value ){
-            //     data.append( key, value );
-            // });
-            // data.append( 'my_file_upload', 1 );
-
-            // let week = document.getElementById("week");
-
-            // console.log(data.getAll('0'))
+            let data = new FormData($('#formdata').get(0));
             $.ajax({
                 url         : 'check.php',
                 type        : 'POST', // важно!
@@ -154,9 +145,6 @@
                     let percent = 10;
                     $( "#general-progress" ).css('width', percent + '%');
                     $( "#progress-value" ).html(percent + '%');
-                    // $( "#progress" ).prop('hidden', false);
-                    // $( ".fa-spinner" ).prop('hidden', false);
-                    // $( "#general-progress" ).addClass('progress-bar-animated');
                 },
 
                 error: function( jqXHR, status, errorThrown ){
@@ -164,30 +152,6 @@
                 }
             
             })
-
-        // $.ajax({
-        //     url         : 'check.php',
-        //     type        : 'POST', // важно!
-        //     data        : {'week': week.value},
-
-        //     beforeSend : function(){
-
-        //     },
-
-        //     complete : function(){
-
-        //     },
-
-        //     success : function(respond, status, jqXHR ){
-        //             console.log(respond);
-        //     },
-
-        //     error: function( jqXHR, status, errorThrown ){
-
-        //     }
-            
-        // })
-
 
 
         // Step 2 search for the company ID by internal number
