@@ -8,7 +8,7 @@ echo '</pre>';
 $yearWeek = explode("-W", $_POST['week']);
 $startEndWeek = weekToDay((int)$yearWeek[1], (int)$yearWeek[0]);
 
-$file = readFile($_FILES);
+$file = myReadFile($_FILES);
 
 echo '<pre>';
 	print_r($startEndWeek);
