@@ -59,9 +59,10 @@
     $(document).ready(function () {
         let flag1 = false;
         let flag2 = false;
+        let percent = 0;
         // Нажатие кнопки выбор файла
         $('#InputNewInvoiceChooseFile, #week').on('change',function(){
-            console.log(this.id);
+            // console.log(this.id);
             // получаем имя файла
             var fileName = $(this).val();
             // измените значение "fake path" (в Chrome) на пустую строку
@@ -79,28 +80,31 @@
             if (this.id == 'week') {
                 if( this.value ){
                     flag2 = true;
-                    console.log( "Выбрали период!" ); 
+                    // console.log( "Выбрали период!" ); 
                 } else { // Если после выбранного тыкнули еще раз, но дальше cancel
                     flag2 = false;
-                    console.log( "Период не выбран" );
+                    // console.log( "Период не выбран" );
                 }
             } else {
                 if( this.value ){
                     flag1 = true;
-                    console.log( "Выбрали файл!" ); 
+                    // console.log( "Выбрали файл!" ); 
                 } else { // Если после выбранного тыкнули еще раз, но дальше cancel
                     flag1 = false;
-                    console.log( "Файл не выбран" );
+                    // console.log( "Файл не выбран" );
                     $(this).next('.custom-file-label').html("Выберите файл");
                 }
             }
         })        
         
         $('#InputNewInvoiceAdd_Button').click(function () {
+            jQuery.ajaxSetup({async:true});
+            var Recordings = null;
             let week = document.getElementById("week");
             let warningStatement2 = document.getElementById("warningStatementInputNewInvoice");
+            let successStatement2 = document.getElementById("successStatementInputNewInvoice");
             // Step 0 we selected the file and the number of the week
-            let percent = 2;
+            percent += 2;
             $( "#general-progress" ).css('width', percent + '%');
             $( "#progress-value" ).html(percent + '%');
             $( "#progress" ).prop('hidden', false);
@@ -108,7 +112,7 @@
             $( "#general-progress" ).addClass('progress-bar-animated');
 
             if (flag1 && flag2) {
-                percent = 6;
+                percent += 4;
                 $( "#general-progress" ).css('width', percent + '%');
                 $( "#progress-value" ).html(percent + '%');
                 $( "#warningStatementInputNewInvoice" ).prop('hidden', true);
@@ -143,7 +147,7 @@
                 contentType : false,
 
                 beforeSend : function(){
-
+                    data.set( 'Step', 1 );
                 },
 
                 complete : function(){
@@ -151,30 +155,78 @@
                 },
 
                 success : function(respond, status, jqXHR ){
-                    console.log(respond);
-                    let percent = 10;
+                    // console.log(respond);
+                    Recordings =(JSON.parse(respond))['recordings'];
+                    // console.log(Recordings[1]);
+                    percent += 4;
                     $( "#general-progress" ).css('width', percent + '%');
                     $( "#progress-value" ).html(percent + '%');
+                    successStatement2.innerHTML = 'Step 1 reading a file';
+                    $( "#successStatementInputNewInvoice" ).prop('hidden', false);
+
+                    // Step 2 search for the company ID by internal number
+                    // console.log(Recordings);
+                    $.ajax({
+                        url         : 'check.php',
+                        type        : 'POST', // важно!
+                        data        : {'Step' : '2', 'recordings': JSON.stringify(Recordings)},
+
+                        // функция успешного ответа сервера
+                        success     : function(respond, status, jqXHR ){
+                            let test = respond;
+                            console.log(test);
+                            percent += 10;
+                            $( "#general-progress" ).css('width', percent + '%');
+                            $( "#progress-value" ).html(percent + '%');
+                            successStatement2.innerHTML = 'Step 2 search for the company ID by internal number';
+
+                            // Step 3 recording the mass and period in the company
+                            $.ajax({
+                                url         : 'check.php',
+                                type        : 'POST', // важно!
+                                data        : {'Step' : '3', 'recordings': 3},
+
+                                // функция успешного ответа сервера
+                                success     : function(respond, status, jqXHR ){
+                                    let test1 = respond;
+                                    console.log(test1);
+                                    percent += 20;
+                                    $( "#general-progress" ).css('width', percent + '%');
+                                    $( "#progress-value" ).html(percent + '%');
+                                    successStatement2.innerHTML = 'Step 3 recording the mass and period in the company';
+                                },
+                            });
+
+                            // Step 4 search for a deal by company ID
+                            $.ajax({
+                                url         : 'check.php',
+                                type        : 'POST', // важно!
+                                data        : {'Step' : '4', 'recordings': 4},
+
+                                // функция успешного ответа сервера
+                                success     : function(respond, status, jqXHR ){
+                                    let test1 = respond;
+                                    console.log(test1);
+                                    percent += 20;
+                                    $( "#general-progress" ).css('width', percent + '%');
+                                    $( "#progress-value" ).html(percent + '%');
+                                    successStatement2.innerHTML = 'Step 4 search for a deal by company ID';
+                                },
+                            });
+                        },
+                    });
                 },
 
                 error: function( jqXHR, status, errorThrown ){
 
                 }
             
-            })
-
-
-        // Step 2 search for the company ID by internal number
-
-
-        // Step 3 recording the mass and period in the company
-
-
-        // Step 4 search for a deal by company ID 
-
+            }) 
 
         // Step 5 Choosing a direction Оплата по Кг
+        // percent += 20;
 
+        // Step 6
 
         })
     })    
