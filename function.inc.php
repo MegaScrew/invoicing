@@ -40,12 +40,15 @@ function myReadFile(array $file){	// функция чтения файла
 	if (($handle = fopen($uploadfile, "r")) !== FALSE) {
 		while (($row = stream_get_line($handle, 1024 * 1024, "\n")) !== false) {
 			$columns = explode(';', $row);                // разбиваем строку на две части по символу ;
-
-			$recordings[$i][0] = $columns[0];
-			$recordings[$i][1] = $columns[1];
-			$recordings[$i][2] = $columns[2];
-			$recordings[$i][3] = $columns[3];
-			$recordings[$i][4] = $columns[4];
+            if ($i == 0) {
+                $i++; 
+                continue;
+            }
+			$recordings[$i-1][0] = $columns[0];
+			$recordings[$i-1][1] = $columns[1];
+			$recordings[$i-1][2] = $columns[2];
+			$recordings[$i-1][3] = $columns[3];
+			$recordings[$i-1][4] = $columns[4];
 			$i++;
 		}
 
