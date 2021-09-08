@@ -9,35 +9,20 @@ switch ($_POST['Step']) {
 		$file = myReadFile($_FILES);
 		$params += $file;
 		echo(json_encode($params, JSON_UNESCAPED_UNICODE));
-
 		// echo '<pre>';
-		// 	print_r($startEndWeek);
+		// 	echo 'Step 1';
 		// echo '</pre>';
-
-		// echo '<pre>';
-		// 	print_r($file);
-		// echo '</pre>';
-
 		break;
 	case '2':
 		$recordings = json_decode($_POST['recordings'], true);
-		unset($recordings[0]);
-		$recordings = array_values($recordings);
 
-		$test = getCompanyList('crm.company.list', $recordings);
-		// echo '<pre>';
-		// 	print_r($test);
-		// echo '</pre>';
+		// $test = getCompanyList('crm.company.list', $recordings);
+		
+		echo '<pre>';
+			print_r(count($recordings));
+		echo '</pre>';
 
 
-		// echo '<pre>';
-		// 	//echo count($_POST['recordings']);
-		// 	print_r(json_decode($_POST['recordings'], true));
-
-		// echo '</pre>';
-		// $params = 'count '.count($_POST['recordings']);
-		// $params += $_POST;
-		// echo 'count '.count($_POST['recordings']);
 		//echo(json_encode($params, JSON_UNESCAPED_UNICODE));
 		echo '<pre>';
 			echo 'Step 2';
