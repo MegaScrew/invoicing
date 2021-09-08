@@ -28,8 +28,15 @@ function weekToDay(int $week_number = 1, int $year = 2011){
 function myReadFile(array $file){
 	$recordings = [];
 	$i = 0;
-	$uploadfile = basename($file[0]['name']);
+	$uploadfile = basename($file['uploaded_file']['name']);
 	
+	if (move_uploaded_file($file['uploaded_file']['tmp_name'], $uploadfile)) {
+	    $result = "Файл был успешно загружен на сервер!";
+	} else {
+	    $result = "Возможная атака с помощью файловой загрузки!";
+	    return array('Error' => $result);
+	}
+
 	if (($handle = fopen($uploadfile, "r")) !== FALSE) {
 		while (($row = stream_get_line($handle, 1024 * 1024, "\n")) !== false) {
 			$columns = explode(';', $row);                // разбиваем строку на две части по символу ;
