@@ -10,11 +10,11 @@ require_once 'crest.php';
 */
 function weekToDay(int $week_number = 1, int $year = 2011){	
 
-	$first_day = date('d/m/Y', $week_number * 7 * 86400 + strtotime('1/1/' . $year) - date('w', strtotime('1/1/' . $year)) * 86400 + 86400);
-	$last_day = date('d/m/Y', ($week_number + 1) * 7 * 86400 + strtotime('1/1/' . $year) - date('w', strtotime('1/1/' . $year)) * 86400);
+	$first_day = date('d.m.Y', $week_number * 7 * 86400 + strtotime('1.1.' . $year) - date('w', strtotime('1.1.' . $year)) * 86400 + 86400);
+	$last_day = date('d.m.Y', ($week_number + 1) * 7 * 86400 + strtotime('1.1.' . $year) - date('w', strtotime('1.1.' . $year)) * 86400);
 
 	for ($i=1;$i<8;$i++){
-  		$day[$i]=date('d/m/Y', $week_number * 7 * 86400 + strtotime('1/1/' . $year) - date('w', strtotime('1/1/' . $year)) * 86400 + 86400*$i);
+  		$day[$i]=date('d.m.Y', $week_number * 7 * 86400 + strtotime('1.1.' . $year) - date('w', strtotime('1.1.' . $year)) * 86400 + 86400*$i);
   	}
 
   	return array('first_day' => $first_day, 'last_day' => $last_day, 'days' => $day);
@@ -160,8 +160,7 @@ function checkArr(int $number, array &$auto, array &$manual){      // функц
 * @param $retailer - retailer number
 * @return array
 */
-function getBigData(string $method = 'crm.company.list', int $retailer = 54)
-{
+function getBigData(string $method = 'crm.company.list', int $retailer = 54){
 
     /***********************************************/
     $params = [
@@ -222,7 +221,7 @@ function getBigData(string $method = 'crm.company.list', int $retailer = 54)
                 $result = CRest::callBatch($arData);
                 if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
             }
-            
+
             $resultTemp = $result['result']['result'];          // Убираем лишнее вложение в массиве
             
             foreach ($resultTemp as $company){                  // Перебираем массив что бы 
@@ -236,5 +235,60 @@ function getBigData(string $method = 'crm.company.list', int $retailer = 54)
 
 
     return $totalResult;
+}
+
+
+/**
+* Update company field mass and priod
+* @param $update - array mass and ID company
+* @param $first_day - first day of the period
+* @param $last_day - last day of the period
+* @return 0
+*/
+function updateCompanyFiled(array $update, string $first_day = '01.01.1900', string $last_day = '07.01.1900'){
+    $total = count($update);            // Всего записей в файле
+    $calls = $total;                    // Сколько запросов надо сделать
+    $current_call = 0;                  // Номер текущего запроса
+    $call_count = 0;                    // Счетчик вызовов для соблюдения условия не больше 2-х запросов в секунду
+
+    $arData = array();                  // Массив для вызова callBatch
+    $result = array();                  // Массив для результатов вызова callBatch
+
+    /***********Цыкл формирования пакета запросов и выполнение их *********/
+    do {
+        $current_call++;
+
+        $temp = [                                   // Собираем запрос
+            'method' => 'crm.company.update',
+            'params' => [ 
+                'ID' => $update[$current_call-1][2],
+                'fields' => [
+                    'UF_CRM_1614603075' => $update[$current_call-1][4], //Перевес в Кг
+                    'UF_CRM_1619766058' => ' c '.$first_day.' по '.$last_day, //Период за который перевес
+                ]
+            ]
+        ];
+
+        array_push($arData, $temp);                 // Сохраняем собранный запрос в массив параметров arData для передачи его в callBatch
+
+        if ((count($arData) == 50) || ($current_call == $calls)) {  // Если в массиве параметров arData 50 запросов или это последний запрос
+            
+            $call_count++;                                      // При каждом вызове увеличиваем счетчик
+            if ($call_count == 2) {                             // Проверяем счетчик вызовов call_count
+                sleep(1);                                       // Если да то делаем паузу 1 сек
+                $call_count = 0;                                // Сбрасываем счетчик
+            }
+
+            $result = CRest::callBatch($arData);                // Вызываем callBatch
+            while($result['error']=="QUERY_LIMIT_EXCEEDED"){
+                sleep(1);
+                $result = CRest::callBatch($arData);
+                if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
+            }
+            $arData = [];                                       // Очишаем массив параметров arData для callBatch
+        }
+
+    } while ($current_call < $calls);                           // Проверяем условие что текущих вызовов меньще чем надо сделать всего
+
 }
 ?>
