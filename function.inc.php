@@ -44,9 +44,9 @@ function myReadFile(array $file){	// функция чтения файла
                 $i++; 
                 continue;
             }
-			$recordings[$i-1][0] = $columns[0];
-			$recordings[$i-1][1] = $columns[1];
-			$recordings[$i-1][2] = $columns[2];
+			$recordings[$i-1][0] = 0;
+			$recordings[$i-1][1] = 0;
+			$recordings[$i-1][2] = 0;
 			$recordings[$i-1][3] = $columns[3];
 			$recordings[$i-1][4] = $columns[4];
 			$i++;
