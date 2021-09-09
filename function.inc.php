@@ -237,7 +237,6 @@ function getBigData(string $method = 'crm.company.list', int $retailer = 54){
     return $totalResult;
 }
 
-
 /**
 * Update company field mass and priod
 * @param $update - array mass and ID company
@@ -289,6 +288,77 @@ function updateCompanyFiled(array $update, string $first_day = '01.01.1900', str
         }
 
     } while ($current_call < $calls);                           // Проверяем условие что текущих вызовов меньще чем надо сделать всего
+}
 
+/**
+* Get a list of deals by company id
+* @param $method - Rest API request method 
+* @param $arCompanyId - array company id
+* @return 0
+*/
+function getDealList(string $method = 'crm.deal.list', array $arCompanyId){            // функция получения ID седлок по ID магазина и сумме поступишвих денег
+    $total = count($arCompanyId);     // Всего записей в выборке
+    $calls = $total;                  // Сколько запросов надо сделать
+    $current_call = 0;                // Номер текущего запроса
+    $call_count = 0;                  // Счетчик вызовов для соблюдения условия не больше 2-х запросов в секунду
+
+    sleep(1);                         // Делаем паузу перед основной работай  
+
+    $arData = array();                // Массив для вызова callBatch
+    $result = array();                // Массив для результатов вызова callBatch
+    $totalResultDeal = array();     // Массив всех выбранных магазинов
+
+    /***********Цыкл формирования пакета запросов и выполнение их *********/
+    do {
+        $current_call++;
+        $temp = [                                   // Собираем запрос
+            'method' => $method,
+            'params' => [ 
+                'filter' => [
+                    'COMPANY_ID' => $arCompanyId[$current_call-1][2],     // ID магазина
+                    'CLOSED' => 'N',                                       // Сделка не закрыта
+                    'CATEGORY_ID' => 12,
+                    '!STAGE_ID' => 'C12:6',                                   
+                    'STAGE_SEMANTIC_ID' => 'P'  //   P - промежуточная стадия, S - успешная стадия, F - провальная стадия (стадии).
+                ],
+                'select' => [
+                    'ID',                              // ID сделки
+                    'STAGE_ID',                        // Стадия сделки
+                    'COMPANY_ID',                      // ID магазина
+                ]
+            ]
+        ];
+
+        array_push($arData, $temp);                 // Сохраняем собранный запрос в массив параметров arData для передачи его в callBatch
+
+        if ((count($arData) == 50) || ($current_call == $calls)) {  // Если в массиве параметров arData 50 запросов или это последний запрос
+            
+            $call_count++;                                      // При каждом вызове увеличиваем счетчик
+            if ($call_count == 2) {                             // Проверяем счетчик вызовов call_count
+                sleep(1);                                       // Если да то делаем паузу 1 сек
+                $call_count = 0;                                // Сбрасываем счетчик
+            }
+
+
+            $result = CRest::callBatch($arData);                // Вызываем callBatch
+            while($result['error']=="QUERY_LIMIT_EXCEEDED"){
+                sleep(1);
+                $result = CRest::callBatch($arData);
+                if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
+            }
+
+            $resultTemp = $result['result']['result'];          // Убираем лишнее вложение в массиве
+            
+            foreach ($resultTemp as $deal){                  // Перебираем массив что бы 
+                foreach ($deal as $value) {                  // удобно было с ним работать в дальнейшем
+                    array_push($totalResultDeal, $value);    // и сохраняем каждый елемент в totalResult
+                }            
+            }
+            $arData = [];                                       // Очишаем массив параметров arData для callBatch
+        }
+    } while ($current_call < $calls);                           // Проверяем условие что текущих вызовов меньще чем надо сделать всего
+
+
+    return $totalResultDeal;
 }
 ?>
