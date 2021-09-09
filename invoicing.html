@@ -99,10 +99,12 @@
         })        
         
         $('#InputNewInvoiceAdd_Button').click(function () {
+            percent = 0;
             jQuery.ajaxSetup({async:true});
             var Recordings = null;
             var first_day = null;
             var last_day = null;
+            var recordingsNotFound = null;
             let week = document.getElementById("week");
             let warningStatement2 = document.getElementById("warningStatementInputNewInvoice");
             let successStatement2 = document.getElementById("successStatementInputNewInvoice");
@@ -151,6 +153,7 @@
 
                 beforeSend : function(){
                     data.set( 'Step', 1 );
+                    successStatement2.innerHTML = 'Start';
                 },
 
                 complete : function(){
@@ -176,23 +179,27 @@
 
                         // функция успешного ответа сервера
                         success     : function(respond, status, jqXHR ){
-                            console.log(respond);
-                            // Recordings = (JSON.parse(respond))['recordings'];
+                            // console.log(respond);
+                            Recordings = (JSON.parse(respond))['recordings'];
                             percent += 10;
                             $( "#general-progress" ).css('width', percent + '%');
                             $( "#progress-value" ).html(percent + '%');
                             successStatement2.innerHTML = 'Step 2 search for the company ID by internal number';
+                            // console.log(Recordings);
+                            if (respond.includes('recordingsNotFound')){
+                                RecordingsNotFound = (JSON.parse(respond))['recordingsNotFound'];
+                                console.log(RecordingsNotFound);
+                            }
 
                             // Step 3 recording the mass and period in the company
                             $.ajax({
                                 url         : 'check.php',
                                 type        : 'POST', // важно!
-                                data        : {'Step' : '3', 'recordings': 3},
+                                data        : {'Step' : '3', 'recordings': JSON.stringify(Recordings), 'first_day': JSON.stringify(first_day), 'last_day': JSON.stringify(last_day)},
 
                                 // функция успешного ответа сервера
                                 success     : function(respond, status, jqXHR ){
-                                    let test1 = respond;
-                                    console.log(test1);
+                                    // console.log(respond);
                                     percent += 20;
                                     $( "#general-progress" ).css('width', percent + '%');
                                     $( "#progress-value" ).html(percent + '%');
@@ -204,19 +211,58 @@
                             $.ajax({
                                 url         : 'check.php',
                                 type        : 'POST', // важно!
-                                data        : {'Step' : '4', 'recordings': 4},
+                                data        : {'Step' : '4', 'recordings': JSON.stringify(Recordings)},
 
                                 // функция успешного ответа сервера
                                 success     : function(respond, status, jqXHR ){
-                                    let test1 = respond;
-                                    console.log(test1);
-                                    percent += 20;
+                                    // console.log(respond);
+                                    percent += 40;
                                     $( "#general-progress" ).css('width', percent + '%');
                                     $( "#progress-value" ).html(percent + '%');
                                     successStatement2.innerHTML = 'Step 4 search for a deal by company ID';
+
+                                    if (respond.includes('recordingsNotFound')){
+                                        RecordingsNotFound = (JSON.parse(respond))['recordingsNotFound'];
+                                        console.log(RecordingsNotFound);
+                                    }
+
+
                                 },
                             });
                         },
+
+                        error: function( jqXHR, status, errorThrown ){
+                            console.log( 'ОШИБКА AJAX запроса: ' + status, jqXHR, errorThrown);
+                            $( "#progress" ).prop('hidden', true);
+                            $( ".fa-spinner" ).prop('hidden', true);
+                            $( "#general-progress" ).removeClass('progress-bar-animated');
+                            $( "#successStatementInputNewInvoice" ).prop('hidden', true);
+
+                            $('#warningStatementInputNewInvoice').prop('hidden', false);
+                            let messageAJAX = '';
+                                 if (jqXHR.status === 0) {
+                                        messageAJAX = 'Неизвестная ошибка:\n' + jqXHR.responseText;
+                                    } else if (jqXHR.status == 404) {
+                                        messageAJAX = 'НЕ найдена страница запроса [404]';
+                                    } else if (jqXHR.status == 500) {
+                                        messageAJAX = 'НЕ найден домен в запросе [500]';
+                                    } else if (jqXHR.status == 502) {
+                                        messageAJAX = 'НЕ найден домен в запросе [502]';
+                                    } else if (jqXHR.status == 503) {
+                                        messageAJAX = 'НЕ найден домен в запросе [503]';
+                                    } else if (jqXHR.status == 504) {
+                                        messageAJAX = 'НЕ найден домен в запросе [504]';
+                                    } else if (exception === 'parsererror') {
+                                        messageAJAX = "Ошибка в коде: \n"+jqXHR.responseText ;
+                                    } else if (exception === 'timeout') {
+                                        messageAJAX = 'Не ответил на запрос.';
+                                    } else if (exception === 'abort') {
+                                        messageAJAX = 'Прерван запрос Ajax.' ;
+                                    } else {
+                                        messageAJAX = 'Неизвестная ошибка:\n' + jqXHR.responseText;
+                                    }
+                            warningStatement2.innerHTML = 'ОШИБКА AJAX запроса: ' + messageAJAX;
+                        }
                     });
                 },
 
