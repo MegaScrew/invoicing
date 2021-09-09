@@ -153,4 +153,88 @@ function checkArr(int $number, array &$auto, array &$manual){      // функц
         
     $auto = array_values($auto);                // переиндексируем массив что бы индексы были по парядку без дыр на тот случай если захотим идти циклом по индексам 
 }
+
+/**
+* Get id company by an number retailer
+* @param $method - Rest API request method 
+* @param $retailer - retailer number
+* @return array
+*/
+function getBigData(string $method = 'crm.company.list', int $retailer = 54)
+{
+
+    /***********************************************/
+    $params = [
+        'filter' => [
+            'UF_CRM_1580400783014' => $retailer    // Название магазина списком
+        ],
+        'select' => [
+            'ID',                              // ID магазина
+            'UF_CRM_1594794891'                // Внутренний номер магазина
+        ],  
+        'start' => 0
+    ];
+
+    $result = CRest::call($method, $params); // Делаем запрос что бы понять сколько записей нам надо будет вытянуть 
+    $total = $result['total'];        // Всего записей в выборке
+    $calls = ceil($total / 50);       // Сколько запросов надо сделать
+    $current_call = 0;                // Номер текущего запроса
+    $call_count = 0;                  // Счетчик вызовов для соблюдения условия не больше 2-х запросов в секунду
+
+    sleep(1);                         // Делаем паузу перед основной работай  
+
+    $arData = array();                // Массив для вызова callBatch
+    $result = array();                // Массив для результатов вызова callBatch
+    $totalResult = array();           // Массив с финальными данными
+
+    /***********Цыкл формирования пакета запросов и выполнение их *********/
+    do {
+        $current_call++;
+
+        $temp = [                                   // Собираем запрос
+            'method' => $method,
+            'params' => [ 
+                'filter' => [
+                    'UF_CRM_1580400783014' => $retailer    // Название магазина списком
+                ],
+                'select' => [
+                    'ID',                              // ID магазина
+                    'UF_CRM_1594794891'                // Внутренний номер магазина
+                ],  
+                'start' => ($current_call - 1) * 50
+            ]
+        ];
+
+        array_push($arData, $temp);                 // Сохраняем собранный запрос в массив параметров arData для передачи его в callBatch
+
+        if ((count($arData) == 50) || ($current_call == $calls)) {  // Если в массиве параметров arData 50 запросов или это последний запрос
+            
+            $call_count++;                                      // При каждом вызове увеличиваем счетчик
+            if ($call_count == 2) {                             // Проверяем счетчик вызовов call_count
+                sleep(1);                                       // Если да то делаем паузу 1 сек
+                $call_count = 0;                                // Сбрасываем счетчик
+            }
+
+
+            $result = CRest::callBatch($arData);                // Вызываем callBatch
+            while($result['error']=="QUERY_LIMIT_EXCEEDED"){
+                sleep(1);
+                $result = CRest::callBatch($arData);
+                if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
+            }
+            
+            $resultTemp = $result['result']['result'];          // Убираем лишнее вложение в массиве
+            
+            foreach ($resultTemp as $company){                  // Перебираем массив что бы 
+                foreach ($company as $value) {                  // удобно было с ним работать в дальнейшем
+                    array_push($totalResult, $value);           // и сохраняем каждый елемент в totalResult
+                }            
+            }
+            $arData = [];                                       // Очишаем массив параметров arData для callBatch
+        }
+    } while ($current_call < $calls);                           // Проверяем условие что текущих вызовов меньще чем надо сделать всего
+
+
+    return $totalResult;
+}
 ?>
