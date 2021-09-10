@@ -380,7 +380,7 @@ function issueAnInvoice(){
 * @param $method - Rest API request method 
 * @return array
 */
-function getAllDeals(string $method = 'crm.deal.list',){
+function getAllDeals(string $method = 'crm.deal.list'){
 
     /***********************************************/
     $params = [
