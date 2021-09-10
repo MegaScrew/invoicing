@@ -19,7 +19,7 @@ switch ($_POST['Step']) {
 	case '2':
 		$recordings = json_decode($_POST['recordings'], true);
 		//$tempRecordings = getCompanyList('crm.company.list', $recordings);
-		$tempRecordings = getBigData('crm.company.list', 54);
+		$tempRecordings = getBigData('crm.company.list');
 		
 		$order = array("\n\t", "\t", "  ", "   ");
 		$replace = ' ';
@@ -40,7 +40,7 @@ switch ($_POST['Step']) {
 		if (count($recordingsNotFound) == 0) {
 			$params = array('recordings' => $recordings);
 		}else{
-			$params = array('recordings' => $recordings, 'recordingsNotFound' => $recordingsNotFound);
+			$params = array('recordings' => $recordings, 'recordingsNotFound' => $recordingsNotFound, 'tempRecordings' => $tempRecordings);
 		}
 		
 		echo(json_encode($params, JSON_UNESCAPED_UNICODE));
@@ -49,7 +49,7 @@ switch ($_POST['Step']) {
 		// 	echo 'Step 2';
 		// echo '</pre>';
 		// echo '<pre>';
-		// 	print_r(var_dump($recordingsNotFound));
+		// 	// print_r(var_dump($recordingsNotFound));
 		// 	print_r(var_dump($tempRecordings));
 		// echo '</pre>';	
 		break;
@@ -63,15 +63,15 @@ switch ($_POST['Step']) {
 		$params = array('Step3' => 'finish');
 		// echo(json_encode($params, JSON_UNESCAPED_UNICODE));
 
-		echo '<pre>';
-			echo 'Step 3';
-		echo '</pre>';
-		echo '<pre>';
-			// print_r($_POST);
-			print_r($first_day);
-			print_r($last_day);
-			// print_r($recordings);
-		echo '</pre>';
+		// echo '<pre>';
+		// 	echo 'Step 3';
+		// echo '</pre>';
+		// echo '<pre>';
+		// 	// print_r($_POST);
+		// 	print_r($first_day);
+		// 	print_r($last_day);
+		// 	// print_r($recordings);
+		// echo '</pre>';
 		break;
 	case '4':
 		$recordings = json_decode($_POST['recordings'], true);
@@ -107,8 +107,11 @@ switch ($_POST['Step']) {
 		// echo '</pre>';
 		break;
 	case '5':
+		$temp = getAllDeals('crm.deal.list');
+
 		echo '<pre>';
 			echo 'Step 5';
+			print_r($temp);
 		echo '</pre>';
 		break;			
 	case '6':
