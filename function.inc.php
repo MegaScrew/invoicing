@@ -155,12 +155,11 @@ function checkArr(int $number, array &$auto, array &$manual){      // функц
 }
 
 /**
-* Get id company by an number retailer
+* Get id everyone company
 * @param $method - Rest API request method 
-* @param $retailer - retailer number
 * @return array
 */
-function getBigData(string $method = 'crm.company.list', int $retailer = 54){
+function getBigData(string $method = 'crm.company.list'){
 
     /***********************************************/
     $params = [
@@ -365,5 +364,23 @@ function getDealList(string $method = 'crm.deal.list', array $arCompanyId){     
 
 
     return $totalResultDeal;
+}
+
+/**
+* Get id everyone deal
+* @param $method - Rest API request method 
+* @return 0
+*/
+function issueAnInvoice(){
+
+}
+
+/**
+* Get id everyone deal
+* @param $method - Rest API request method 
+* @return 0
+*/
+function getAllDeals(){
+
 }
 ?>
