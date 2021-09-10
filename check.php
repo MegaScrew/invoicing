@@ -29,9 +29,9 @@ switch ($_POST['Step']) {
 			}
 		}
 
-		checkArr(2, $recordings, $recordingsNotFound);
+		checkArr(2, $recordings, $recordingsNotFound);			// проверяем найден или нет ID магазина 
 
-		if (count($recordingsNotFound) > 0) {
+		if (count($recordingsNotFound) == 0) {
 			$params = array('recordings' => $recordings);
 		}else{
 			$params = array('recordings' => $recordings, 'recordingsNotFound' => $recordingsNotFound);
@@ -43,7 +43,7 @@ switch ($_POST['Step']) {
 		// 	echo 'Step 2';
 		// echo '</pre>';
 		// echo '<pre>';
-		// 	print_r($recordings);
+		// 	print_r(count($recordingsNotFound));
 		// echo '</pre>';	
 		break;
 	case '3':
@@ -80,9 +80,9 @@ switch ($_POST['Step']) {
 			}
 		}
 
-		checkArr(1, $recordings, $recordingsNotFound);
+		checkArr(1, $recordings, $recordingsNotFound);					// проверяем найдена или нет активная сделка в направлении Оплата за КГ по ID магазина
 
-		if (count($recordingsNotFound) > 0) {
+		if (count($recordingsNotFound) == 0) {
 			$params = array('recordings' => $recordings);
 		}else{
 			$params = array('recordings' => $recordings, 'recordingsNotFound' => $recordingsNotFound);
