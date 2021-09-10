@@ -21,9 +21,15 @@ switch ($_POST['Step']) {
 		//$tempRecordings = getCompanyList('crm.company.list', $recordings);
 		$tempRecordings = getBigData('crm.company.list', 54);
 		
+		$order = array("\n\t", "\t", "  ", "   ");
+		$replace = ' ';
+
 		foreach ($recordings as &$row) {
 			foreach ($tempRecordings as $rowtest) {
-				if (strcasecmp($row[3], $rowtest['UF_CRM_1594794891']) == 0) {
+				// if (strcasecmp($row[3], $rowtest['UF_CRM_1594794891']) == 0) {
+				$strTemp = str_replace($order, $replace, $rowtest['UF_CRM_1594794891']);
+				$strTemp = trim($strTemp);
+				if ($row[3] == (int)$strTemp) {	
 					$row[2] = $rowtest['ID'];
 				}				
 			}
@@ -43,7 +49,8 @@ switch ($_POST['Step']) {
 		// 	echo 'Step 2';
 		// echo '</pre>';
 		// echo '<pre>';
-		// 	print_r(count($recordingsNotFound));
+		// 	print_r(var_dump($recordingsNotFound));
+		// 	print_r(var_dump($tempRecordings));
 		// echo '</pre>';	
 		break;
 	case '3':
@@ -51,20 +58,20 @@ switch ($_POST['Step']) {
 		$first_day = json_decode($_POST['first_day'], true);
 		$last_day = json_decode($_POST['last_day'], true);
 
-		updateCompanyFiled($recordings, $first_day, $last_day);
+		// updateCompanyFiled($recordings, $first_day, $last_day);
 
 		$params = array('Step3' => 'finish');
-		echo(json_encode($params, JSON_UNESCAPED_UNICODE));
+		// echo(json_encode($params, JSON_UNESCAPED_UNICODE));
 
-		// echo '<pre>';
-		// 	echo 'Step 3';
-		// echo '</pre>';
-		// echo '<pre>';
-		// 	// print_r($_POST);
-		// 	print_r($first_day);
-		// 	print_r($last_day);
-		// 	// print_r($recordings);
-		// echo '</pre>';
+		echo '<pre>';
+			echo 'Step 3';
+		echo '</pre>';
+		echo '<pre>';
+			// print_r($_POST);
+			print_r($first_day);
+			print_r($last_day);
+			// print_r($recordings);
+		echo '</pre>';
 		break;
 	case '4':
 		$recordings = json_decode($_POST['recordings'], true);

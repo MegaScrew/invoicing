@@ -51,6 +51,36 @@
 			</div>
 		</div>
 	</div>
+    <div class="col-12 mt-3 mb-xl-5" id="accordion">
+        <div class="accordion" id="resultStep">
+            <div class="card" id="cardStep2" hidden="hidden">
+                <div class="card-header" id="headingOne">
+                    <h2 class="mb-0 d-flex">
+                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">Не найден ID магазина</button>
+                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 140px" id="getCSVStep2">Скачать CSV</button>
+                    </h2>
+                </div>
+                <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#resultStep">
+                    <div class="card-body">
+                        <div class="table-responsive" id="Step2"></div>    
+                    </div>
+                </div>
+            </div>
+            <div class="card" id="cardStep4" hidden="hidden">
+                <div class="card-header" id="headingTwo">
+                    <h2 class="mb-0 d-flex">
+                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">Не найдена активная сделка у магазина</button>
+                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 140px" id="getCSVStep4">Скачать CSV</button>
+                    </h2>
+                </div>
+                <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#resultStep">
+                    <div class="card-body">
+                        <div class="table-responsive" id="Step4"></div>    
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>    
 </div>
 
 <script src="https://code.jquery.com/jquery-latest.js"></script>
@@ -77,6 +107,8 @@
             $( ".fa-spinner" ).prop('hidden', true);
             $( "#general-progress" ).removeClass('progress-bar-animated');
             $( "#successStatementInputNewInvoice" ).prop('hidden', true);
+            $( "#cardStep2" ).prop('hidden', true);
+            $( "#cardStep4" ).prop('hidden', true);
 
             if (this.id == 'week') {
                 if( this.value ){
@@ -108,6 +140,8 @@
             let week = document.getElementById("week");
             let warningStatement2 = document.getElementById("warningStatementInputNewInvoice");
             let successStatement2 = document.getElementById("successStatementInputNewInvoice");
+            let Step2 = document.getElementById("Step2");
+            let Step4 = document.getElementById("Step4");
             // Step 0 we selected the file and the number of the week
             percent += 2;
             $( "#general-progress" ).css('width', percent + '%');
@@ -115,6 +149,9 @@
             $( "#progress" ).prop('hidden', false);
             $( ".fa-spinner" ).prop('hidden', false);
             $( "#general-progress" ).addClass('progress-bar-animated');
+            $( "#cardStep2" ).prop('hidden', true);
+            $( "#cardStep4" ).prop('hidden', true);
+
 
             if (flag1 && flag2) {
                 percent += 4;
@@ -189,6 +226,9 @@
                             if (respond.includes('recordingsNotFound')){
                                 RecordingsNotFound = (JSON.parse(respond))['recordingsNotFound'];
                                 console.log(RecordingsNotFound);
+                                $( "#cardStep2" ).prop('hidden', false);
+                                Step2.innerHTML = 'Step2';
+
                             }
 
                             // Step 3 recording the mass and period in the company
@@ -224,6 +264,8 @@
                                     if (respond.includes('recordingsNotFound')){
                                         RecordingsNotFound = (JSON.parse(respond))['recordingsNotFound'];
                                         console.log(RecordingsNotFound);
+                                        $( "#cardStep4" ).prop('hidden', false);
+                                        Step4.innerHTML = printTable('test');
                                     }
 
 
@@ -278,7 +320,44 @@
         // Step 6
 
         })
-    })    
+    })
+
+    function printTable(data) {
+        htmlTable = `
+                    <div class="text-center">
+                            <h3>'.$title.'</h3>
+                            <h3>документов: '.count($temp).'</h3>                           
+                    </div>
+                    <table class="table-striped table-bordered table-sm">
+                        <thead>
+                            <tr>
+                                <td>№</td>
+                                <td>Дата</td>
+                                <td>Время</td>
+                                <td>Номер документа</td>
+                                <td>Внутренний номер магазина</td>
+                                <td>Плательщик</td>
+                                <td>Сумма</td>
+                                <td>Назначение Платежа</td>
+                                <td>Статус обработки</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                                    <td>'.$i.'</td>
+                                    <td>'.$value[0].'</td>
+                                    <td>'.$value[1].'</td>
+                                    <td>'.$value[4].'</td>
+                                    <td><a href="https://rahalcrm.bitrix24.ru/crm/company/details/'.$value[12].'/" target="_blank">'.$value[5].'</a></td>
+                                    <td>'.$value[6].'</td>                                  
+                                    <td>'.$value[9].'</td>
+                                    <td>'.$value[8].'</td>
+                                    <td>'.$value[17].'</td>
+                                </tr>
+                                </tbody>
+                    </table>`;
+        return htmlTable;
+     }   
 </script>       
 
 </body>
