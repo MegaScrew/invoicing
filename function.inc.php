@@ -174,7 +174,12 @@ function getBigData(string $method = 'crm.company.list', int $retailer = 54){
         'start' => 0
     ];
 
-    $result = CRest::call($method, $params); // Делаем запрос что бы понять сколько записей нам надо будет вытянуть 
+    $result = CRest::call($method, $params); // Делаем запрос что бы понять сколько записей нам надо будет вытянуть
+    while($result['error']=="QUERY_LIMIT_EXCEEDED"){
+        sleep(1);
+        $result = CRest::callBatch($arData);
+        if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
+    } 
     $total = $result['total'];        // Всего записей в выборке
     $calls = ceil($total / 50);       // Сколько запросов надо сделать
     $current_call = 0;                // Номер текущего запроса
