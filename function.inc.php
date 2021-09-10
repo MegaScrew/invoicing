@@ -392,7 +392,8 @@ function getAllDeals(string $method = 'crm.deal.list'){
         ],
         'select' => [
             'ID',                              // ID сделки
-            'STAGE_ID'                
+            'STAGE_ID',
+            'COMPANY_ID',                      // ID магазина                
         ],  
         'start' => 0
     ];
@@ -429,7 +430,8 @@ function getAllDeals(string $method = 'crm.deal.list'){
                 ],
                 'select' => [
                     'ID',                              // ID сделки
-                    'STAGE_ID'                       
+                    'STAGE_ID',
+                    'COMPANY_ID',                      // ID магазина                       
                 ],  
                 'start' => ($current_call - 1) * 50
             ]
