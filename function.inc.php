@@ -165,7 +165,7 @@ function getBigData(string $method = 'crm.company.list', int $retailer = 54){
     /***********************************************/
     $params = [
         'filter' => [
-            'UF_CRM_1580400783014' => $retailer    // Название магазина списком
+            '>UF_CRM_1594794891' => 0    // Внутренний номер магазина боьше нуля
         ],
         'select' => [
             'ID',                              // ID магазина
@@ -199,7 +199,7 @@ function getBigData(string $method = 'crm.company.list', int $retailer = 54){
             'method' => $method,
             'params' => [ 
                 'filter' => [
-                    'UF_CRM_1580400783014' => $retailer    // Название магазина списком
+                    '>UF_CRM_1594794891' => 0    // Внутренний номер магазина боьше нуля
                 ],
                 'select' => [
                     'ID',                              // ID магазина
