@@ -414,7 +414,7 @@
                         </table>
                     </div>`;
         return htmlTable;
-     }
+    }
 
     function printTableDeals(data) {
         let str = '';
@@ -479,7 +479,41 @@
                         </table>
                     </div>`;
         return htmlTable;
-     }      
+    }
+
+    function get_csv(name, data) {
+        // console.log(autoTable_data7);       
+        $.ajax({
+            url         : 'csv.php',
+            type        : 'POST', // важно!
+            data        : {'name': name, 'data' : data},
+
+            // функция успешного ответа сервера
+            success     : function(respond, status, jqXHR ){
+                // console.log(respond);
+                /*
+                   * Make CSV downloadable
+                   */
+                  var downloadLink = document.createElement("a");
+                  var fileData = ['\ufeff'+respond];
+
+                  var blobObject = new Blob(fileData,{
+                     type: "text/csv;charset=utf-8;"
+                   });
+
+                  var url = URL.createObjectURL(blobObject);
+                  downloadLink.href = url;
+                  downloadLink.download = name+".csv";
+
+                  /*
+                   * Actually download CSV
+                   */
+                  document.body.appendChild(downloadLink);
+                  downloadLink.click();
+                  document.body.removeChild(downloadLink);
+            },
+        });
+    };    
 </script>       
 
 </body>
