@@ -58,7 +58,7 @@
                 <div class="card-header" id="headingOne">
                     <h2 class="mb-0 d-flex">
                         <button class="btn btn-link btn-block text-left mr-1" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">Не найден ID магазина</button>
-                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 140px" id="getCSVStep2">Скачать CSV</button>
+                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 140px" id="getCSVStep2" onclick="get_csv('getCSVStep2')">Скачать CSV</button>
                     </h2>
                 </div>
                 <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#resultStep">
@@ -72,7 +72,7 @@
                     <h2 class="mb-0 d-flex">
                         <button class="btn btn-link btn-block text-left mr-1" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" id="btnCollapseTwo">Найденные сделки в группе стадий "В работе"</button>
                         <button type="button" class="btn btn-block btn-danger text-center mr-1" style="width: 160px" id="goStep6">Без отгрузок</button>
-                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 160px" id="getCSVStep4">Скачать CSV</button>
+                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 160px" id="getCSVStep4" onclick="get_csv('getCSVStep4')">Скачать CSV</button>
                     </h2>
                 </div>
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#resultStep">
@@ -86,7 +86,7 @@
                     <h2 class="mb-0 d-flex">
                         <button class="btn btn-link btn-block text-left mr-1" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree" id="btnheadingThree">Найденные сделки</button>
                         <button type="button" class="btn btn-block btn-danger text-center mr-1" style="width: 160px" id="goStep5">Без отгрузок</button>
-                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 160px" id="getCSVStep5">Скачать CSV</button>
+                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 160px" id="getCSVStep41" onclick="get_csv('getCSVStep41')">Скачать CSV</button>
                     </h2>
                 </div>
                 <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#resultStep">
@@ -248,7 +248,6 @@
                             // console.log(Recordings);
                             if (respond.includes('recordingsNotFound')){
                                 RecordingsNotFound = (JSON.parse(respond))['recordingsNotFound'];
-                                let tempRecordings = (JSON.parse(respond))['tempRecordings'];
                                 console.log(RecordingsNotFound);
                                 $( "#cardStep2" ).prop('hidden', false);
                                 Step2.innerHTML = printTable(RecordingsNotFound);
@@ -481,12 +480,16 @@
         return htmlTable;
     }
 
-    function get_csv(name, data) {
-        // console.log(autoTable_data7);       
+    function get_csv(name) {
+        // console.log(autoTable_data7);
+        let data = null;
+        if (name == 'getCSVStep2') {data = RecordingsNotFound;}
+        if (name == 'getCSVStep4') {data = Recordings;} 
+        if (name == 'getCSVStep41') {data = noShipment;}        
         $.ajax({
             url         : 'csv.php',
             type        : 'POST', // важно!
-            data        : {'name': name, 'data' : data, 'first_day' : first_day, 'last_day' : last_day},
+            data        : {'name': name, 'data' : JSON.stringify(data), 'first_day' : first_day, 'last_day' : last_day},
 
             // функция успешного ответа сервера
             success     : function(respond, status, jqXHR ){
