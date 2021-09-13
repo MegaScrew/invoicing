@@ -486,7 +486,7 @@
         $.ajax({
             url         : 'csv.php',
             type        : 'POST', // важно!
-            data        : {'name': name, 'data' : data},
+            data        : {'name': name, 'data' : data, 'first_day' : first_day, 'last_day' : last_day},
 
             // функция успешного ответа сервера
             success     : function(respond, status, jqXHR ){
