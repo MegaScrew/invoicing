@@ -1,14 +1,14 @@
 <?php
 
 header('Content-Type: text/csv');
-header('Content-Disposition: attachment; filename = '.$_POST['year'].'-'.date('y-m-d').'.csv');
+header('Content-Disposition: attachment; filename = '.$_POST['name'].' c '.$_POST['first_day'].'po'.$_POST['last_day'].'.csv');
 require_once 'function.inc.php';
 
 $output = fopen("php://output", "w");
 
 $name = $_POST['name'];
 $name = $name.'_data';
-$data = json_decode($_POST['check'], true)[$name];
+$data = json_decode($_POST['data'], true)[$name];
 
 getCSV($data, $name, $output);
 
