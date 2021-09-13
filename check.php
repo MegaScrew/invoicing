@@ -31,16 +31,21 @@ switch ($_POST['Step']) {
 				$strTemp = trim($strTemp);
 				if ($row[3] == (int)$strTemp) {	
 					$row[2] = $rowtest['ID'];
+					break;
 				}				
 			}
 		}
 
 		checkArr(2, $recordings, $recordingsNotFound);			// проверяем найден или нет ID магазина 
 
-		if (count($recordingsNotFound) == 0) {
-			$params = array('recordings' => $recordings);
-		}else{
-			$params = array('recordings' => $recordings, 'recordingsNotFound' => $recordingsNotFound, 'tempRecordings' => $tempRecordings);
+		$params = array('step' => 2);
+
+		if (count($recordings) != 0) {
+			$params += array('recordings' => $recordings);
+		}
+
+		if (count($recordingsNotFound) != 0) {
+			$params += array( 'recordingsNotFound' => $recordingsNotFound);
 		}
 		
 		echo(json_encode($params, JSON_UNESCAPED_UNICODE));
@@ -61,7 +66,7 @@ switch ($_POST['Step']) {
 		// updateCompanyFiled($recordings, $first_day, $last_day);
 
 		$params = array('Step3' => 'finish');
-		// echo(json_encode($params, JSON_UNESCAPED_UNICODE));
+		echo(json_encode($params, JSON_UNESCAPED_UNICODE));
 
 		// echo '<pre>';
 		// 	echo 'Step 3';
@@ -75,35 +80,50 @@ switch ($_POST['Step']) {
 		break;
 	case '4':
 		$recordings = json_decode($_POST['recordings'], true);
-		
-		$dealList = getDealList('crm.deal.list', $recordings);
-		
+		$noShipment = [];
+		$dealList = getAllDeals('crm.deal.list');
+
 		foreach ($recordings as &$row) {
-			foreach ($dealList as $rowtest) {
+			foreach ($dealList as &$rowtest) {
 				if (strcasecmp($row[2], $rowtest['COMPANY_ID']) == 0) {
 					$row[1] = $rowtest['ID'];
 					$row[0] = $rowtest['STAGE_ID'];
-				}				
+					$rowtest[3] = 1;
+					break;
+
+				}			
 			}
 		}
 
+		checkArr2(3, $dealList, $noShipment);
+		unset($noShipment);
+
 		checkArr(1, $recordings, $recordingsNotFound);					// проверяем найдена или нет активная сделка в направлении Оплата за КГ по ID магазина
 
-		if (count($recordingsNotFound) == 0) {
-			$params = array('recordings' => $recordings);
-		}else{
-			$params = array('recordings' => $recordings, 'recordingsNotFound' => $recordingsNotFound);
+		$params = array('step' => 4);
+
+		if (count($recordings) != 0) {
+			$params += array('recordings' => $recordings);
+		}
+
+		if (count($recordingsNotFound) != 0) {
+			$params += array( 'recordingsNotFound' => $recordingsNotFound);
 		}
 		
+		if (count($dealList) != 0) {
+			$params += array('noShipment' => $dealList);
+		}
+
 		echo(json_encode($params, JSON_UNESCAPED_UNICODE));
 
 		// echo '<pre>';
 		// 	echo 'Step 4';
 		// echo '</pre>';
 		// echo '<pre>';
-		// 	// print_r($_POST);
-		// 	print_r($recordings);
-		// 	print_r($recordingsNotFound);
+			// print_r($_POST);
+			// print_r($recordings);
+			// print_r($recordingsNotFound);
+			// print_r($noShipment);
 		// echo '</pre>';
 		break;
 	case '5':
