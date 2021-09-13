@@ -103,6 +103,11 @@
 <script src="https://code.jquery.com/jquery-latest.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
 <script>
+    var Recordings = null;
+    var first_day = null;
+    var last_day = null;
+    var recordingsNotFound = null;
+    var noShipment = null;
     $(document).ready(function () {
         let flag1 = false;
         let flag2 = false;
@@ -151,11 +156,11 @@
         $('#InputNewInvoiceAdd_Button').click(function () {
             percent = 0;
             jQuery.ajaxSetup({async:true});
-            var Recordings = null;
-            var first_day = null;
-            var last_day = null;
-            var recordingsNotFound = null;
-            var noShipment = null;
+            // var Recordings = null;
+            // var first_day = null;
+            // var last_day = null;
+            // var recordingsNotFound = null;
+            // var noShipment = null;
             let week = document.getElementById("week");
             let warningStatement2 = document.getElementById("warningStatementInputNewInvoice");
             let successStatement2 = document.getElementById("successStatementInputNewInvoice");
@@ -483,13 +488,14 @@
     function get_csv(name) {
         // console.log(autoTable_data7);
         let data = null;
-        if (name == 'getCSVStep2') {data = RecordingsNotFound;}
-        if (name == 'getCSVStep4') {data = Recordings;} 
-        if (name == 'getCSVStep41') {data = noShipment;}        
+        let pattern = 0;
+        if (name == 'getCSVStep2') {data = RecordingsNotFound; pattern = 1;}
+        if (name == 'getCSVStep4') {data = Recordings; pattern = 2;} 
+        if (name == 'getCSVStep41') {data = noShipment; pattern = 3;}        
         $.ajax({
             url         : 'csv.php',
             type        : 'POST', // важно!
-            data        : {'name': name, 'data' : JSON.stringify(data), 'first_day' : first_day, 'last_day' : last_day},
+            data        : {'name': name, 'data' : JSON.stringify(data), 'first_day' : first_day, 'last_day' : last_day, 'pattern' : pattern},
 
             // функция успешного ответа сервера
             success     : function(respond, status, jqXHR ){
