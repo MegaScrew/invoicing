@@ -501,9 +501,37 @@ function checkArr2(int $number, array &$auto, array &$manual){      // функ�
 * @param $method - Rest API request method 
 * @return 0
 */
-function getCSV(array $data, string $name = '', &$output){
-    $temp = $data;
-    fputcsv($output, array('Дата', 'Время', 'Баланс','name','name', 'внутренний номер магазина', 'ФИО плтильщика', 'name', 'назначение платежа', 'сумма', 'сумма', 'новая стадия сделки', 'ID магазина', 'ID сделки', 'ID КА', 'стадия сделки', 'ФИО из битрикса', 'Статус обработки'), ';');
+function getCSV(array $data, string $name = '', &$output, string $pattern = '1'){
+    $temp = [];
+    $temp2 = [];
+    if ((int)$pattern == 1) {
+        fputcsv($output, array('Внутренний номер', 'Вес за период'), ';');
+
+        foreach ($data as $value) {
+            $temp2[0] = $value[3];
+            $temp2[1] = $value[4];
+            array_push($temp, $temp2);
+        }
+    }
+    
+    if ((int)$pattern == 2) {
+        fputcsv($output, array('ID Сделки', 'ID магазина', 'Внутренний номер', 'Вес за период'), ';');
+        
+        foreach ($data as $value) {
+            $temp2[0] = $value[1];
+            $temp2[1] = $value[2];
+            $temp2[2] = $value[3];
+            $temp2[3] = $value[4];
+            array_push($temp, $temp2);
+        }
+    }
+    
+    if ((int)$pattern == 3) {
+        fputcsv($output, array('ID Сделки', 'Стадия', 'ID магазина',), ';');
+        
+        $temp = $data;
+    }
+
     foreach ($temp as $value) {
         fputcsv($output, $value, ";");
     }
