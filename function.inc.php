@@ -409,23 +409,23 @@ function issueAnInvoice(string $method = 'crm.deal.update', array $arDeal){
                 $call_count = 0;                                // Сбрасываем счетчик
             }
 
-            echo '<pre>';
-                print_r($arData);
-            echo '</pre>';
+            // echo '<pre>';
+            //     print_r($arData);
+            // echo '</pre>';
 
-            //$result = CRest::callBatch($arData);                // Вызываем callBatch
+            $result = CRest::callBatch($arData);                // Вызываем callBatch
             
             while($result['error']=="QUERY_LIMIT_EXCEEDED"){
                 sleep(1);
-                //$result = CRest::callBatch($arData);
+                $result = CRest::callBatch($arData);
                 if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
             }
 
             $totalResultDeals = $result['result']['result'];          // Убираем лишнее вложение в массиве
             
-            echo '<pre>';
-                print_r($totalResultDeals);
-            echo '</pre>';
+            // echo '<pre>';
+            //     print_r($totalResultDeals);
+            // echo '</pre>';
 
             $arData = [];                                       // Очишаем массив параметров arData для callBatch
         }
@@ -626,7 +626,7 @@ function moveNoShipment(string $method = 'crm.deal.update', array $arDeal){
         $temp = [                                   // Собираем запрос
             'method' => $method,
             'params' => [
-                'ID' => $arDeal[$current_call-1][0],        // ID сделки
+                'ID' => $arDeal[$current_call-1]['ID'],        // ID сделки
                 'fields' => [
                     'STAGE_ID' => 'C12:12',        // новая стадия
                 ],
@@ -646,23 +646,23 @@ function moveNoShipment(string $method = 'crm.deal.update', array $arDeal){
                 $call_count = 0;                                // Сбрасываем счетчик
             }
 
-            echo '<pre>';
-                print_r($arData);
-            echo '</pre>';
+            // echo '<pre>';
+            //     print_r($arData);
+            // echo '</pre>';
 
-            //$result = CRest::callBatch($arData);                // Вызываем callBatch
+            $result = CRest::callBatch($arData);                // Вызываем callBatch
             
             while($result['error']=="QUERY_LIMIT_EXCEEDED"){
                 sleep(1);
-                //$result = CRest::callBatch($arData);
+                $result = CRest::callBatch($arData);
                 if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
             }
 
             $totalResultDeals = $result['result']['result'];          // Убираем лишнее вложение в массиве
             
-            echo '<pre>';
-                print_r($totalResultDeals);
-            echo '</pre>';
+            // echo '<pre>';
+            //     print_r($totalResultDeals);
+            // echo '</pre>';
 
             $arData = [];                                       // Очишаем массив параметров arData для callBatch
         }

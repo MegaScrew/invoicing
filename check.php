@@ -61,10 +61,10 @@ switch ($_POST['Step']) {
 		$first_day = json_decode($_POST['first_day'], true);
 		$last_day = json_decode($_POST['last_day'], true);
 
-		// updateCompanyFiled($recordings, $first_day, $last_day);
+		updateCompanyFiled($recordings, $first_day, $last_day);
 
 		$params = array('Step3' => 'finish');
-		// echo(json_encode($params, JSON_UNESCAPED_UNICODE));
+		echo(json_encode($params, JSON_UNESCAPED_UNICODE));
 
 		// echo '<pre>';
 		// 	echo 'Step 3';
@@ -126,6 +126,9 @@ switch ($_POST['Step']) {
 		$recordings = json_decode($_POST['recordings'], true);
 		$temp = issueAnInvoice('crm.deal.update', $recordings);
 
+		$params = array('Step5' => 'finish');
+		echo(json_encode($params, JSON_UNESCAPED_UNICODE));
+
 		// echo '<pre>';
 		// 	echo 'Step 5 ';
 		// 	print_r(count($recordings));
@@ -135,6 +138,9 @@ switch ($_POST['Step']) {
 	case '6':
 		$noShipment = json_decode($_POST['noShipment'], true);
 		$temp = moveNoShipment('crm.deal.update', $noShipment);
+
+		$params = array('Step6' => 'finish');
+		echo(json_encode($params, JSON_UNESCAPED_UNICODE));
 
 		// echo '<pre>';
 		// 	echo 'Step 6';
