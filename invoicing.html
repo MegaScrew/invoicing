@@ -517,6 +517,13 @@
     function issueAnInvoice() {
         let Go = confirm('Вы уверены что хотите сформировать ' + Recordings.length + ' квитанций?');
         if (Go) {
+             if (percent == 100) {
+                percent = 90;
+                $( ".fa-spinner" ).prop('hidden', false);
+                $( "#progress-value" ).html(percent + '%');
+                $( "#general-progress" ).removeClass('bg-success');
+                $( "#general-progress" ).addClass('progress-bar-animated');
+            }
             $.ajax({
                 url         : 'check.php',
                 type        : 'POST', // важно!
@@ -558,8 +565,16 @@
     }
 
     function MoveNoShipment() {
+
         let Go = confirm('Вы уверены что хотите перенести ' + noShipment.length + ' сделок в стадию "Без отгрузки"?');
         if (Go) {
+            if (percent == 100) {
+                percent = 90;
+                $( ".fa-spinner" ).prop('hidden', false);
+                $( "#progress-value" ).html(percent + '%');
+                $( "#general-progress" ).removeClass('bg-success');
+                $( "#general-progress" ).addClass('progress-bar-animated');
+            }
             $.ajax({
                 url         : 'check.php',
                 type        : 'POST', // важно!
