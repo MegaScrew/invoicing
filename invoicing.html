@@ -57,8 +57,8 @@
             <div class="card" id="cardStep2" hidden="hidden">
                 <div class="card-header" id="headingOne">
                     <h2 class="mb-0 d-flex">
-                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">Не найден ID магазина</button>
-                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 140px" id="getCSVStep2">Скачать CSV</button>
+                        <button class="btn btn-link btn-block text-left mr-1" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">Не найден ID магазина</button>
+                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 140px" id="getCSVStep2" onclick="get_csv('getCSVStep2')">Скачать CSV</button>
                     </h2>
                 </div>
                 <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#resultStep">
@@ -70,8 +70,9 @@
             <div class="card" id="cardStep4" hidden="hidden">
                 <div class="card-header" id="headingTwo">
                     <h2 class="mb-0 d-flex">
-                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" id="btnCollapseTwo">Найденные сделки в группе стадий "В работе"</button>
-                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 140px" id="getCSVStep4">Скачать CSV</button>
+                        <button class="btn btn-link btn-block text-left mr-1" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo" id="btnCollapseTwo">Найденные сделки в группе стадий "В работе"</button>
+                        <button type="button" class="btn btn-block btn-danger text-center mr-1" style="width: 320px" id="goStep6" onclick="issueAnInvoice()">Сформировать квитанции</button>
+                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 160px" id="getCSVStep4" onclick="get_csv('getCSVStep4')">Скачать CSV</button>
                     </h2>
                 </div>
                 <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#resultStep">
@@ -80,16 +81,17 @@
                     </div>
                 </div>
             </div>
-            <div class="card" id="cardStep5" hidden="hidden">
+            <div class="card" id="cardStep41" hidden="hidden">
                 <div class="card-header" id="headingThree">
                     <h2 class="mb-0 d-flex">
-                        <button class="btn btn-link btn-block text-left" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree" id="btnheadingThree">Найденные сделки в группе стадий "В работе" по которым не было отгрузок</button>
-                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 140px" id="getCSVStep5">Скачать CSV</button>
+                        <button class="btn btn-link btn-block text-left mr-1" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree" id="btnheadingThree">Найденные сделки</button>
+                        <button type="button" class="btn btn-block btn-danger text-center mr-1" style="width: 320px" id="goStep5" onclick="MoveNoShipment()">Перенести в "Без отгрузок"</button>
+                        <button type="button" class="btn btn-block btn-secondary text-center" style="width: 160px" id="getCSVStep41" onclick="get_csv('getCSVStep41')">Скачать CSV</button>
                     </h2>
                 </div>
                 <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#resultStep">
                     <div class="card-body">
-                        <div class="table-responsive" id="Step5"></div>    
+                        <div class="table-responsive" id="Step41"></div>    
                     </div>
                 </div>
             </div>
@@ -101,12 +103,28 @@
 <script src="https://code.jquery.com/jquery-latest.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js" integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous"></script>
 <script>
+    var Recordings = null;
+    var first_day = null;
+    var last_day = null;
+    var recordingsNotFound = null;
+    var noShipment = null;
+    var percent = 0;
+    var week = document.getElementById("week");
+    var warningStatement2 = document.getElementById("warningStatementInputNewInvoice");
+    var successStatement2 = document.getElementById("successStatementInputNewInvoice");
+    var Step2 = document.getElementById("Step2");
+    var Step4 = document.getElementById("Step4");
+    var Step41 = document.getElementById("Step41");
+    var btnCollapseTwo = document.getElementById("btnCollapseTwo");
+    var btnheadingThree = document.getElementById("btnheadingThree");
+
     $(document).ready(function () {
         let flag1 = false;
         let flag2 = false;
-        let percent = 0;
+        
         // Нажатие кнопки выбор файла
         $('#InputNewInvoiceChooseFile, #week').on('change',function(){
+            percent = 0;
             // console.log(this.id);
             // получаем имя файла
             var fileName = $(this).val();
@@ -115,32 +133,28 @@
             // заменяем надпись "Выберите файл" в label
             $(this).next('.custom-file-label').html(fileName);
 
-            let percent = 0;
             $( "#general-progress" ).css('width', percent + '%');
             $( "#progress-value" ).html(percent + '%');
             $( "#progress" ).prop('hidden', true);
             $( ".fa-spinner" ).prop('hidden', true);
             $( "#general-progress" ).removeClass('progress-bar-animated');
+            $( "#general-progress" ).removeClass('bg-success');
             $( "#successStatementInputNewInvoice" ).prop('hidden', true);
             $( "#cardStep2" ).prop('hidden', true);
             $( "#cardStep4" ).prop('hidden', true);
-            $( "#cardStep5" ).prop('hidden', true);
+            $( "#cardStep41" ).prop('hidden', true);
 
             if (this.id == 'week') {
                 if( this.value ){
                     flag2 = true;
-                    // console.log( "Выбрали период!" ); 
                 } else { // Если после выбранного тыкнули еще раз, но дальше cancel
                     flag2 = false;
-                    // console.log( "Период не выбран" );
                 }
             } else {
                 if( this.value ){
                     flag1 = true;
-                    // console.log( "Выбрали файл!" ); 
                 } else { // Если после выбранного тыкнули еще раз, но дальше cancel
                     flag1 = false;
-                    // console.log( "Файл не выбран" );
                     $(this).next('.custom-file-label').html("Выберите файл");
                 }
             }
@@ -149,18 +163,6 @@
         $('#InputNewInvoiceAdd_Button').click(function () {
             percent = 0;
             jQuery.ajaxSetup({async:true});
-            var Recordings = null;
-            var first_day = null;
-            var last_day = null;
-            var recordingsNotFound = null;
-            let week = document.getElementById("week");
-            let warningStatement2 = document.getElementById("warningStatementInputNewInvoice");
-            let successStatement2 = document.getElementById("successStatementInputNewInvoice");
-            let Step2 = document.getElementById("Step2");
-            let Step4 = document.getElementById("Step4");
-            let Step5 = document.getElementById("Step5");
-            let btnCollapseTwo = document.getElementById("btnCollapseTwo");
-            // Step 0 we selected the file and the number of the week
             percent += 2;
             $( "#general-progress" ).css('width', percent + '%');
             $( "#progress-value" ).html(percent + '%');
@@ -169,7 +171,7 @@
             $( "#general-progress" ).addClass('progress-bar-animated');
             $( "#cardStep2" ).prop('hidden', true);
             $( "#cardStep4" ).prop('hidden', true);
-            $( "#cardStep5" ).prop('hidden', true);
+            $( "#cardStep41" ).prop('hidden', true);
 
 
             if (flag1 && flag2) {
@@ -192,8 +194,6 @@
             
             // Step 1 reading a file
             //////////////////////////////////////////////////////
-            // let files = document.querySelector('#InputNewInvoiceChooseFile').files;
-            // console.log(files);
 
             let data = new FormData($('#formdata').get(0));
             $.ajax({
@@ -209,6 +209,9 @@
 
                 beforeSend : function(){
                     data.set( 'Step', 1 );
+                    percent += 2;
+                    $( "#general-progress" ).css('width', percent + '%');
+                    $( "#progress-value" ).html(percent + '%');
                     successStatement2.innerHTML = 'Start';
                 },
 
@@ -221,7 +224,7 @@
                     Recordings = (JSON.parse(respond))['recordings'];
                     first_day = (JSON.parse(respond))['first_day'];
                     last_day = (JSON.parse(respond))['last_day'];
-                    percent += 4;
+                    percent += 2;
                     $( "#general-progress" ).css('width', percent + '%');
                     $( "#progress-value" ).html(percent + '%');
                     successStatement2.innerHTML = 'Step 1 reading a file';
@@ -233,24 +236,27 @@
                         type        : 'POST', // важно!
                         data        : {'Step' : '2', 'recordings': JSON.stringify(Recordings)},
 
+                        beforeSend : function(){
+                            percent += 5;
+                            $( "#general-progress" ).css('width', percent + '%');
+                            $( "#progress-value" ).html(percent + '%');
+                            successStatement2.innerHTML = 'Start search for the company ID by internal number';
+                        },
+
                         // функция успешного ответа сервера
                         success     : function(respond, status, jqXHR ){
                             // console.log(respond);
                             Recordings = (JSON.parse(respond))['recordings'];
-                            percent += 10;
+                            percent += 5;
                             $( "#general-progress" ).css('width', percent + '%');
                             $( "#progress-value" ).html(percent + '%');
-                            successStatement2.innerHTML = 'Step 2 search for the company ID by internal number';
+                            successStatement2.innerHTML = 'Finish search for the company ID by internal number';
                             // console.log(Recordings);
                             if (respond.includes('recordingsNotFound')){
                                 RecordingsNotFound = (JSON.parse(respond))['recordingsNotFound'];
-                                let tempRecordings = (JSON.parse(respond))['tempRecordings'];
                                 console.log(RecordingsNotFound);
                                 $( "#cardStep2" ).prop('hidden', false);
                                 Step2.innerHTML = printTable(RecordingsNotFound);
-                                // Step2.innerHTML += printTestTable(tempRecordings);
-                                // console.log(tempRecordings);
-
                             }
 
                             // Step 3 recording the mass and period in the company
@@ -259,13 +265,20 @@
                                 type        : 'POST', // важно!
                                 data        : {'Step' : '3', 'recordings': JSON.stringify(Recordings), 'first_day': JSON.stringify(first_day), 'last_day': JSON.stringify(last_day)},
 
+                                beforeSend : function(){
+                                    percent += 10;
+                                    $( "#general-progress" ).css('width', percent + '%');
+                                    $( "#progress-value" ).html(percent + '%');
+                                    successStatement2.innerHTML = 'Start recording the mass and period in the company';
+                                },
+
                                 // функция успешного ответа сервера
                                 success     : function(respond, status, jqXHR ){
                                     // console.log(respond);
-                                    percent += 20;
+                                    percent += 10;
                                     $( "#general-progress" ).css('width', percent + '%');
                                     $( "#progress-value" ).html(percent + '%');
-                                    successStatement2.innerHTML = 'Step 3 recording the mass and period in the company';
+                                    successStatement2.innerHTML = 'Finish recording the mass and period in the company';
                                 },
                             });
 
@@ -275,14 +288,17 @@
                                 type        : 'POST', // важно!
                                 data        : {'Step' : '4', 'recordings': JSON.stringify(Recordings)},
 
+                                beforeSend : function(){
+                                    percent += 20;
+                                    $( "#general-progress" ).css('width', percent + '%');
+                                    $( "#progress-value" ).html(percent + '%');
+                                    successStatement2.innerHTML = 'Start search for a deal by company ID';
+                                },
+
                                 // функция успешного ответа сервера
                                 success     : function(respond, status, jqXHR ){
                                     // console.log(respond);
-                                    percent += 40;
-                                    $( "#general-progress" ).css('width', percent + '%');
-                                    $( "#progress-value" ).html(percent + '%');
-                                    successStatement2.innerHTML = 'Step 4 search for a deal by company ID';
-
+                                    
                                     if (respond.includes('recordings')){
                                         Recordings = (JSON.parse(respond))['recordings'];
                                         console.log(Recordings);
@@ -291,37 +307,35 @@
                                         Step4.innerHTML = printTableDeals(Recordings);
                                     }
 
-
-                                },
-                            });
-
-                            // Step 5 сделки не попавшие в выставление счетов
-                            $.ajax({
-                                url         : 'check.php',
-                                type        : 'POST', // важно!
-                                data        : {'Step' : '5', 'recordings': JSON.stringify(Recordings)},
-
-                                // функция успешного ответа сервера
-                                success     : function(respond, status, jqXHR ){
-                                    // console.log(respond);
-                                    percent += 10;
-                                    $( "#general-progress" ).css('width', percent + '%');
-                                    $( "#progress-value" ).html(percent + '%');
-                                    successStatement2.innerHTML = 'Step 5 search deal without shipments';
-
-                                    if (respond.includes('recordings')){
-                                        Recordings = (JSON.parse(respond))['recordings'];
-                                        console.log(Recordings);
-                                        $( "#cardStep5" ).prop('hidden', false);
-                                        btnCollapseTwo.innerHTML = `Найденные сделки в группе стадий "В работе" по которым не было отгрузки с ${first_day} по ${last_day}`;
-                                        Step5.innerHTML = printTableDeals(Recordings);
+                                    if (respond.includes('noShipment')){
+                                        noShipment = (JSON.parse(respond))['noShipment'];
+                                        console.log(noShipment);
+                                        $( "#cardStep41" ).prop('hidden', false);
+                                        btnheadingThree.innerHTML = `Найденные сделки в группе стадий "В работе" по которым не было отгрузки с ${first_day} по ${last_day}`;
+                                        Step41.innerHTML = printTableNoShipment(noShipment);
                                     }
 
+                                    if (!respond.includes('recordings')){
+                                        percent += 10;
+                                    }
 
+                                    if (!respond.includes('noShipment')){
+                                        percent += 10;
+                                    }
+
+                                    percent += 20;
+                                    $( "#general-progress" ).css('width', percent + '%');
+                                    $( "#progress-value" ).html(percent + '%');
+                                    successStatement2.innerHTML = 'Finish search for a deal by company ID';
+
+                                    if (percent == 100) {
+                                        $( ".fa-spinner" ).prop('hidden', true);
+                                        $( "#progress-value" ).html(percent + '% Finish!');
+                                        $( "#general-progress" ).addClass('bg-success');
+                                        $( "#general-progress" ).removeClass('progress-bar-animated');    
+                                    }
                                 },
                             });
-
-                            
                         },
 
                         error: function( jqXHR, status, errorThrown ){
@@ -361,15 +375,8 @@
 
                 error: function( jqXHR, status, errorThrown ){
 
-                }
-            
+                }          
             }) 
-
-        // Step 6 Choosing a direction Оплата по Кг
-        // percent += 10;
-
-        // Step 7
-
         })
     })
 
@@ -402,7 +409,7 @@
                         </table>
                     </div>`;
         return htmlTable;
-     }
+    }
 
     function printTableDeals(data) {
         let str = '';
@@ -437,13 +444,14 @@
         return htmlTable;
     }
 
-    function printTestTable(data) {        
+    function printTableNoShipment(data) {        
         let str = '';
         data.forEach(function(item, i, data){
             str = str + `<tr>
                         <td>${i+1}</td>
-                        <td>${item['ID']}</td> 
-                        <td>${item['UF_CRM_1594794891']}</td>                                                                  
+                        <td><a href="https://rahalcrm.bitrix24.ru/crm/deal/details/${item['ID']}/" target="_blank">${item['ID']}</a></td> 
+                        <td>${item['STAGE_ID']}</td>
+                        <td><a href="https://rahalcrm.bitrix24.ru/crm/company/details/${item['COMPANY_ID']}/" target="_blank">${item['COMPANY_ID']}</a></td>                                                                   
                     </tr>`;
         });
 
@@ -454,8 +462,10 @@
                             <thead>
                                 <tr>
                                     <td>№</td>
+                                    <td>ID сделки</td>
+                                    <td>Стадия</td>
                                     <td>ID магазина</td>
-                                    <td>Внутренний номер</td>
+                                    
                                 </tr>
                             </thead>
                             <tbody>
@@ -464,7 +474,131 @@
                         </table>
                     </div>`;
         return htmlTable;
-     }      
+    }
+
+    function get_csv(name) {
+        let data = null;
+        let pattern = 0;
+        if (name == 'getCSVStep2') {data = RecordingsNotFound; pattern = 1;}
+        if (name == 'getCSVStep4') {data = Recordings; pattern = 2;} 
+        if (name == 'getCSVStep41') {data = noShipment; pattern = 3;}        
+        $.ajax({
+            url         : 'csv.php',
+            type        : 'POST', // важно!
+            data        : {'name': name, 'data' : JSON.stringify(data), 'first_day' : first_day, 'last_day' : last_day, 'pattern' : pattern},
+
+            // функция успешного ответа сервера
+            success     : function(respond, status, jqXHR ){
+                // console.log(respond);
+                /*
+                   * Make CSV downloadable
+                   */
+                  var downloadLink = document.createElement("a");
+                  var fileData = ['\ufeff'+respond];
+
+                  var blobObject = new Blob(fileData,{
+                     type: "text/csv;charset=utf-8;"
+                   });
+
+                  var url = URL.createObjectURL(blobObject);
+                  downloadLink.href = url;
+                  downloadLink.download = name+".csv";
+
+                  /*
+                   * Actually download CSV
+                   */
+                  document.body.appendChild(downloadLink);
+                  downloadLink.click();
+                  document.body.removeChild(downloadLink);
+            },
+        });
+    }
+
+    function issueAnInvoice() {
+        let Go = confirm('Вы уверены что хотите сформировать ' + Recordings.length + ' квитанций?');
+        if (Go) {
+            $.ajax({
+                url         : 'check.php',
+                type        : 'POST', // важно!
+                data        : {'Step' : '5', 'recordings': JSON.stringify(Recordings)},
+
+                beforeSend : function(){
+                    percent += 5;
+                    $( "#general-progress" ).css('width', percent + '%');
+                    $( "#progress-value" ).html(percent + '%');
+                    successStatement2.innerHTML = 'Start issue an invoice';
+                },
+
+                complete : function(){
+                    successStatement2.innerHTML = 'Finish issue an invoice';
+                },
+
+                // функция успешного ответа сервера
+                success     : function(respond, status, jqXHR ){
+                    // console.log(respond);
+                    percent += 5;
+                    $( "#general-progress" ).css('width', percent + '%');
+                    $( "#progress-value" ).html(percent + '%');
+                    successStatement2.innerHTML = 'Finish issue an invoice';
+
+                    if (respond.includes('recordings')){
+                        Recordings = (JSON.parse(respond))['recordings'];
+                        console.log(Recordings);
+                    }
+
+                    if (percent == 100) {
+                        $( ".fa-spinner" ).prop('hidden', true);
+                        $( "#progress-value" ).html(percent + '% Finish!');
+                        $( "#general-progress" ).addClass('bg-success');
+                        $( "#general-progress" ).removeClass('progress-bar-animated');    
+                    }
+                },
+            });
+        }    
+    }
+
+    function MoveNoShipment() {
+        let Go = confirm('Вы уверены что хотите перенести ' + noShipment.length + ' сделок в стадию "Без отгрузки"?');
+        if (Go) {
+            $.ajax({
+                url         : 'check.php',
+                type        : 'POST', // важно!
+                data        : {'Step' : '6', 'noShipment': JSON.stringify(noShipment)},
+
+                beforeSend : function(){
+                    percent += 5;
+                    $( "#general-progress" ).css('width', percent + '%');
+                    $( "#progress-value" ).html(percent + '%');
+                    successStatement2.innerHTML = 'Start move no shipment';
+                },
+
+                complete : function(){
+                    successStatement2.innerHTML = 'Finish move no shipment';
+                },
+
+                // функция успешного ответа сервера
+                success     : function(respond, status, jqXHR ){
+                    // console.log(respond);
+                    percent += 5;
+                    $( "#general-progress" ).css('width', percent + '%');
+                    $( "#progress-value" ).html(percent + '%');
+                    successStatement2.innerHTML = 'Finish move no shipment';
+
+                    if (respond.includes('recordings')){
+                        Recordings = (JSON.parse(respond))['recordings'];
+                        console.log(Recordings);
+                    }
+
+                    if (percent == 100) {
+                        $( ".fa-spinner" ).prop('hidden', true);
+                        $( "#progress-value" ).html(percent + '% Finish!');
+                        $( "#general-progress" ).addClass('bg-success');
+                        $( "#general-progress" ).removeClass('progress-bar-animated');    
+                    }
+                },
+            });
+        }
+    }
 </script>       
 
 </body>

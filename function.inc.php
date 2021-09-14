@@ -1,7 +1,6 @@
 <?php
 require_once 'crest.php';
 
-
 /**
 * Get first and last day week
 * @param $week_number - week number
@@ -367,12 +366,79 @@ function getDealList(string $method = 'crm.deal.list', array $arCompanyId){     
 }
 
 /**
-* Get id everyone deal
+* Set new stage deals
 * @param $method - Rest API request method 
 * @return 0
 */
-function issueAnInvoice(){
+function issueAnInvoice(string $method = 'crm.deal.update', array $arDeal){
+    $total = count($arDeal);          // Всего записей в выборке
+    $calls = $total;                  // Сколько запросов надо сделать
+    $current_call = 0;                // Номер текущего запроса
+    $call_count = 0;                  // Счетчик вызовов для соблюдения условия не больше 2-х запросов в секунду
 
+    sleep(1);                         // Делаем паузу перед основной работай  
+
+    $arData = array();                // Массив для вызова callBatch
+    $result = array();                // Массив для результатов вызова callBatch
+    $totalResultDeals = array();    // Массив всех выбранных магазинов
+
+    /***********Цыкл формирования пакета запросов и выполнение их *********/
+    do {
+        $current_call++;
+
+        $temp = [                                   // Собираем запрос
+            'method' => $method,
+            'params' => [
+                'ID' => $arDeal[$current_call-1][1],        // ID сделки
+                'fields' => [
+                    'STAGE_ID' => 'C12:EXECUTING',        // новая стадия
+                ],
+                'params' => [
+                    'REGISTER_SONET_EVENT' => 'Y',       // произвести регистрацию события изменения сделки в живой ленте. Дополнительно будет отправлено уведомление ответственному за сделку.
+                ]
+            ]
+        ];
+
+        array_push($arData, $temp);                 // Сохраняем собранный запрос в массив параметров arData для передачи его в callBatch
+
+        if ((count($arData) == 50) || ($current_call == $calls)) {  // Если в массиве параметров arData 50 запросов или это последний запрос
+            
+            $call_count++;                                      // При каждом вызове увеличиваем счетчик
+            if ($call_count == 2) {                             // Проверяем счетчик вызовов call_count
+                sleep(1);                                       // Если да то делаем паузу 1 сек
+                $call_count = 0;                                // Сбрасываем счетчик
+            }
+
+            echo '<pre>';
+                print_r($arData);
+            echo '</pre>';
+
+            //$result = CRest::callBatch($arData);                // Вызываем callBatch
+            
+            while($result['error']=="QUERY_LIMIT_EXCEEDED"){
+                sleep(1);
+                //$result = CRest::callBatch($arData);
+                if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
+            }
+
+            $totalResultDeals = $result['result']['result'];          // Убираем лишнее вложение в массиве
+            
+            echo '<pre>';
+                print_r($totalResultDeals);
+            echo '</pre>';
+
+            $arData = [];                                       // Очишаем массив параметров arData для callBatch
+        }
+    } while ($current_call < $calls);                           // Проверяем условие что текущих вызовов меньще чем надо сделать всего
+
+    // стадии для проведения оплат
+    // стало                                        было
+    //4                     - Первичные             2
+    //C2:6                  - Активные              C2:PREPAYMENT_INVOICE
+    //C12:FINAL_INVOICE     - Оплата за КГ          C12:PREPAYMENT_INVOICE
+    //C10:6                 - Склады                C10:4
+
+    return $totalResultDeals;
 }
 
 /**
@@ -469,4 +535,147 @@ function getAllDeals(string $method = 'crm.deal.list'){
 
     return $totalResult;
 }
+
+/**
+* searches for 1 in an array string and moves the found string to a new array before deleting it from the search array
+* @param $number - number key in row array
+* @param $auto - the array in which we will search
+* @param $manual - the array to which we will transfer the found
+* @return 0
+*/
+function checkArr2(int $number, array &$auto, array &$manual){      // функция для проверки массива
+    $i = 0;
+    $arrSplice = [];
+    foreach ($auto as &$row){             // перебираем массив 
+        if ($row[$number] != 0) {
+            array_push($manual, $row);    
+            array_push($arrSplice, $i);         // записываем индекс документа 
+        }
+        $i++;
+    }
+
+    for ($i=0; $i < count($arrSplice); $i++) {  // в цикле перебираем и удаляем  документы 
+        unset($auto[$arrSplice[$i]]);
+    }
+        
+    $auto = array_values($auto);                // переиндексируем массив что бы индексы были по парядку без дыр на тот случай если захотим идти циклом по индексам 
+}
+
+/**
+* Write CSV file
+* @param $method - Rest API request method 
+* @return 0
+*/
+function getCSV(array $data, string $name = '', &$output, string $pattern = '1'){
+    $temp = [];
+    $temp2 = [];
+    if ((int)$pattern == 1) {
+        fputcsv($output, array('Внутренний номер', 'Вес за период'), ';');
+
+        foreach ($data as $value) {
+            $temp2[0] = $value[3];
+            $temp2[1] = $value[4];
+            array_push($temp, $temp2);
+        }
+    }
+    
+    if ((int)$pattern == 2) {
+        fputcsv($output, array('ID Сделки', 'ID магазина', 'Внутренний номер', 'Вес за период'), ';');
+        
+        foreach ($data as $value) {
+            $temp2[0] = $value[1];
+            $temp2[1] = $value[2];
+            $temp2[2] = $value[3];
+            $temp2[3] = $value[4];
+            array_push($temp, $temp2);
+        }
+    }
+    
+    if ((int)$pattern == 3) {
+        fputcsv($output, array('ID Сделки', 'Стадия', 'ID магазина',), ';');
+        
+        $temp = $data;
+    }
+
+    foreach ($temp as $value) {
+        fputcsv($output, $value, ";");
+    }
+}
+
+/**
+* Set new stage deals
+* @param $method - Rest API request method 
+* @return 0
+*/
+function moveNoShipment(string $method = 'crm.deal.update', array $arDeal){
+    $total = count($arDeal);          // Всего записей в выборке
+    $calls = $total;                  // Сколько запросов надо сделать
+    $current_call = 0;                // Номер текущего запроса
+    $call_count = 0;                  // Счетчик вызовов для соблюдения условия не больше 2-х запросов в секунду
+
+    sleep(1);                         // Делаем паузу перед основной работай  
+
+    $arData = array();                // Массив для вызова callBatch
+    $result = array();                // Массив для результатов вызова callBatch
+    $totalResultDeals = array();    // Массив всех выбранных магазинов
+
+    /***********Цыкл формирования пакета запросов и выполнение их *********/
+    do {
+        $current_call++;
+
+        $temp = [                                   // Собираем запрос
+            'method' => $method,
+            'params' => [
+                'ID' => $arDeal[$current_call-1][0],        // ID сделки
+                'fields' => [
+                    'STAGE_ID' => 'C12:12',        // новая стадия
+                ],
+                'params' => [
+                    'REGISTER_SONET_EVENT' => 'Y',       // произвести регистрацию события изменения сделки в живой ленте. Дополнительно будет отправлено уведомление ответственному за сделку.
+                ]
+            ]
+        ];
+
+        array_push($arData, $temp);                 // Сохраняем собранный запрос в массив параметров arData для передачи его в callBatch
+
+        if ((count($arData) == 50) || ($current_call == $calls)) {  // Если в массиве параметров arData 50 запросов или это последний запрос
+            
+            $call_count++;                                      // При каждом вызове увеличиваем счетчик
+            if ($call_count == 2) {                             // Проверяем счетчик вызовов call_count
+                sleep(1);                                       // Если да то делаем паузу 1 сек
+                $call_count = 0;                                // Сбрасываем счетчик
+            }
+
+            echo '<pre>';
+                print_r($arData);
+            echo '</pre>';
+
+            //$result = CRest::callBatch($arData);                // Вызываем callBatch
+            
+            while($result['error']=="QUERY_LIMIT_EXCEEDED"){
+                sleep(1);
+                //$result = CRest::callBatch($arData);
+                if ($result['error']<>"QUERY_LIMIT_EXCEEDED"){break;}
+            }
+
+            $totalResultDeals = $result['result']['result'];          // Убираем лишнее вложение в массиве
+            
+            echo '<pre>';
+                print_r($totalResultDeals);
+            echo '</pre>';
+
+            $arData = [];                                       // Очишаем массив параметров arData для callBatch
+        }
+    } while ($current_call < $calls);                           // Проверяем условие что текущих вызовов меньще чем надо сделать всего
+
+    // стадии для проведения оплат
+    // стало                                        было
+    //4                     - Первичные             2
+    //C2:6                  - Активные              C2:PREPAYMENT_INVOICE
+    //C12:FINAL_INVOICE     - Оплата за КГ          C12:PREPAYMENT_INVOICE
+    //C10:6                 - Склады                C10:4
+
+    return $totalResultDeals;
+}
+
 ?>
