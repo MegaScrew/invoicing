@@ -592,7 +592,7 @@ function getCSV(array $data, string $name = '', &$output, string $pattern = '1')
     }
     
     if ((int)$pattern == 3) {
-        fputcsv($output, array('ID Сделки', 'Стадия', 'ID магазина',), ';');
+        fputcsv($output, array('ID Сделки', 'Стадия', 'ID магазина'), ';');
         
         $temp = $data;
     }
