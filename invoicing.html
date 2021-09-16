@@ -524,43 +524,104 @@
                 $( "#general-progress" ).removeClass('bg-success');
                 $( "#general-progress" ).addClass('progress-bar-animated');
             }
-            $.ajax({
-                url         : 'check.php',
-                type        : 'POST', // важно!
-                data        : {'Step' : '5', 'recordings': JSON.stringify(Recordings)},
 
-                beforeSend : function(){
-                    percent += 5;
-                    $( "#general-progress" ).css('width', percent + '%');
-                    $( "#progress-value" ).html(percent + '%');
-                    successStatement2.innerHTML = 'Start issue an invoice';
-                },
+            let total = Recordings.length;          // Всего записей в выборке
+            let calls = total;                  // Сколько запросов надо сделать
+            let current_call = 0;                // Номер текущего запроса
+            let call_count = 0;                  // Счетчик вызовов для соблюдения условия не больше 2-х запросов в секунду
+            let batch = 100;                // записей в пачке
+            let call_batch = Math.ceil(total / batch);  // сколько запрсов надо сделать            
+            let k = Math.floor(5 / call_batch * 100) / 100 ;
 
-                complete : function(){
-                    successStatement2.innerHTML = 'Finish issue an invoice';
-                },
+            let arData = [];                // Массив для вызова callBatch
 
-                // функция успешного ответа сервера
-                success     : function(respond, status, jqXHR ){
-                    // console.log(respond);
-                    percent += 5;
-                    $( "#general-progress" ).css('width', percent + '%');
-                    $( "#progress-value" ).html(percent + '%');
-                    successStatement2.innerHTML = 'Finish issue an invoice';
+            do {
+                current_call++;
+                arData.push(Recordings[current_call - 1]);
 
-                    if (respond.includes('recordings')){
-                        Recordings = (JSON.parse(respond))['recordings'];
-                        console.log(Recordings);
-                    }
+                if ((arData.length == batch) || (current_call == calls)) {
+                    call_count++;
 
-                    if (percent == 100) {
-                        $( ".fa-spinner" ).prop('hidden', true);
-                        $( "#progress-value" ).html(percent + '% Finish!');
-                        $( "#general-progress" ).addClass('bg-success');
-                        $( "#general-progress" ).removeClass('progress-bar-animated');    
-                    }
-                },
-            });
+                    $.ajax({
+                        url         : 'check.php',
+                        type        : 'POST', // важно!
+                        data        : {'Step' : '5', 'recordings': JSON.stringify(arData)},
+
+                        beforeSend : function(){
+                            percent += k;
+                            $( "#general-progress" ).css('width', percent + '%');
+                            $( "#progress-value" ).html(percent + '%');
+                            successStatement2.innerHTML = 'Start issue an invoice';
+                        },
+
+                        complete : function(){
+                            successStatement2.innerHTML = 'Finish issue an invoice';
+                        },
+
+                        // функция успешного ответа сервера
+                        success     : function(respond, status, jqXHR ){
+                            // console.log(respond);
+                            percent += k;
+                            $( "#general-progress" ).css('width', percent + '%');
+                            $( "#progress-value" ).html(percent + '%');
+                            successStatement2.innerHTML = 'Finish issue an invoice';
+
+                            if (respond.includes('recordings')){
+                                Recordings = (JSON.parse(respond))['recordings'];
+                                console.log(Recordings);
+                            }
+
+                            if (Math.round(percent) == 100) {
+                                $( ".fa-spinner" ).prop('hidden', true);
+                                $( "#progress-value" ).html(Math.round(percent) + '% Finish!');
+                                $( "#general-progress" ).addClass('bg-success');
+                                $( "#general-progress" ).removeClass('progress-bar-animated');    
+                            }
+                        },
+                    });
+                    arData.length = 0;
+                    sleep(1000);
+                }
+                if (call_count == 6) {call_count = 0; sleep(180000);} 
+
+            } while (current_call < calls);
+            // $.ajax({
+            //     url         : 'check.php',
+            //     type        : 'POST', // важно!
+            //     data        : {'Step' : '5', 'recordings': JSON.stringify(Recordings)},
+
+            //     beforeSend : function(){
+            //         percent += 5;
+            //         $( "#general-progress" ).css('width', percent + '%');
+            //         $( "#progress-value" ).html(percent + '%');
+            //         successStatement2.innerHTML = 'Start issue an invoice';
+            //     },
+
+            //     complete : function(){
+            //         successStatement2.innerHTML = 'Finish issue an invoice';
+            //     },
+
+            //     // функция успешного ответа сервера
+            //     success     : function(respond, status, jqXHR ){
+            //         // console.log(respond);
+            //         percent += 5;
+            //         $( "#general-progress" ).css('width', percent + '%');
+            //         $( "#progress-value" ).html(percent + '%');
+            //         successStatement2.innerHTML = 'Finish issue an invoice';
+
+            //         if (respond.includes('recordings')){
+            //             Recordings = (JSON.parse(respond))['recordings'];
+            //             console.log(Recordings);
+            //         }
+
+            //         if (percent == 100) {
+            //             $( ".fa-spinner" ).prop('hidden', true);
+            //             $( "#progress-value" ).html(percent + '% Finish!');
+            //             $( "#general-progress" ).addClass('bg-success');
+            //             $( "#general-progress" ).removeClass('progress-bar-animated');    
+            //         }
+            //     },
+            // });
         }    
     }
 
@@ -575,43 +636,108 @@
                 $( "#general-progress" ).removeClass('bg-success');
                 $( "#general-progress" ).addClass('progress-bar-animated');
             }
-            $.ajax({
-                url         : 'check.php',
-                type        : 'POST', // важно!
-                data        : {'Step' : '6', 'noShipment': JSON.stringify(noShipment)},
 
-                beforeSend : function(){
-                    percent += 5;
-                    $( "#general-progress" ).css('width', percent + '%');
-                    $( "#progress-value" ).html(percent + '%');
-                    successStatement2.innerHTML = 'Start move no shipment';
-                },
+            let total = noShipment.length;          // Всего записей в выборке
+            let calls = total;                  // Сколько запросов надо сделать
+            let current_call = 0;                // Номер текущего запроса
+            let call_count = 0;                  // Счетчик вызовов для соблюдения условия не больше 2-х запросов в секунду
+            let batch = 100;                // записей в пачке
+            let call_batch = Math.ceil(total / batch);  // сколько запрсов надо сделать            
+            let k = Math.floor(5 / call_batch * 100) / 100 ;
 
-                complete : function(){
-                    successStatement2.innerHTML = 'Finish move no shipment';
-                },
+            let arData = [];                // Массив для вызова callBatch
 
-                // функция успешного ответа сервера
-                success     : function(respond, status, jqXHR ){
-                    // console.log(respond);
-                    percent += 5;
-                    $( "#general-progress" ).css('width', percent + '%');
-                    $( "#progress-value" ).html(percent + '%');
-                    successStatement2.innerHTML = 'Finish move no shipment';
+            do {
+                current_call++;
+                arData.push(noShipment[current_call - 1]);
 
-                    if (respond.includes('recordings')){
-                        Recordings = (JSON.parse(respond))['recordings'];
-                        console.log(Recordings);
-                    }
+                if ((arData.length == batch) || (current_call == calls)) {
+                    call_count++;
 
-                    if (percent == 100) {
-                        $( ".fa-spinner" ).prop('hidden', true);
-                        $( "#progress-value" ).html(percent + '% Finish!');
-                        $( "#general-progress" ).addClass('bg-success');
-                        $( "#general-progress" ).removeClass('progress-bar-animated');    
-                    }
-                },
-            });
+                    $.ajax({
+                        url         : 'check.php',
+                        type        : 'POST', // важно!
+                        data        : {'Step' : '6', 'noShipment': JSON.stringify(arData)},
+
+                        beforeSend : function(){
+                            percent += k;
+                            $( "#general-progress" ).css('width', percent + '%');
+                            $( "#progress-value" ).html(percent + '%');
+                            successStatement2.innerHTML = 'Start move no shipment';
+                        },
+
+                        complete : function(){
+                            successStatement2.innerHTML = 'Finish move no shipment';
+                        },
+
+                        // функция успешного ответа сервера
+                        success     : function(respond, status, jqXHR ){
+                            // console.log(respond);
+                            percent += k;
+                            $( "#general-progress" ).css('width', percent + '%');
+                            $( "#progress-value" ).html(percent + '%');
+                            successStatement2.innerHTML = 'Finish move no shipment';
+
+                            if (respond.includes('recordings')){
+                                Recordings = (JSON.parse(respond))['recordings'];
+                                console.log(Recordings);
+                            }
+
+                            if (Math.round(percent) >= 100) {
+                                $( ".fa-spinner" ).prop('hidden', true);
+                                $( "#progress-value" ).html(Math.round(percent) + '% Finish!');
+                                $( "#general-progress" ).addClass('bg-success');
+                                $( "#general-progress" ).removeClass('progress-bar-animated');    
+                            }
+                        },
+                    });
+                    arData.length = 0;
+                    sleep(1000);
+                }
+                if (call_count == 6) {call_count = 0; sleep(180000);} 
+
+            } while (current_call < calls);
+
+
+
+
+            // $.ajax({
+            //     url         : 'check.php',
+            //     type        : 'POST', // важно!
+            //     data        : {'Step' : '6', 'noShipment': JSON.stringify(noShipment)},
+
+            //     beforeSend : function(){
+            //         percent += 5;
+            //         $( "#general-progress" ).css('width', percent + '%');
+            //         $( "#progress-value" ).html(percent + '%');
+            //         successStatement2.innerHTML = 'Start move no shipment';
+            //     },
+
+            //     complete : function(){
+            //         successStatement2.innerHTML = 'Finish move no shipment';
+            //     },
+
+            //     // функция успешного ответа сервера
+            //     success     : function(respond, status, jqXHR ){
+            //         // console.log(respond);
+            //         percent += 5;
+            //         $( "#general-progress" ).css('width', percent + '%');
+            //         $( "#progress-value" ).html(percent + '%');
+            //         successStatement2.innerHTML = 'Finish move no shipment';
+
+            //         if (respond.includes('recordings')){
+            //             Recordings = (JSON.parse(respond))['recordings'];
+            //             console.log(Recordings);
+            //         }
+
+            //         if (percent == 100) {
+            //             $( ".fa-spinner" ).prop('hidden', true);
+            //             $( "#progress-value" ).html(percent + '% Finish!');
+            //             $( "#general-progress" ).addClass('bg-success');
+            //             $( "#general-progress" ).removeClass('progress-bar-animated');    
+            //         }
+            //     },
+            // });
         }
     }
 </script>       
